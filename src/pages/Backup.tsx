@@ -64,9 +64,6 @@ export default function Backup() {
   };
 
   const runRecovery = () => {
-    // Re-seed missing data
-    const { seedData } = require('@/lib/seed');
-    seedData();
     store.addAudit({ user_id: 'system', action: 'RECOVERY_EXECUTED', details: 'Data repair wizard completed' });
     setShowRecovery(false);
     window.location.reload();
