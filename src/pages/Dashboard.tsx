@@ -1,7 +1,10 @@
 import { store } from '@/lib/store';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
-import { LayoutDashboard, FolderKanban, FileSearch, Users, Shield, FlaskConical, Package, AlertTriangle } from 'lucide-react';
+import StatusBoard from '@/components/StatusBoard';
+import MissionTimeline from '@/components/MissionTimeline';
+import PriorityAlerts from '@/components/PriorityAlerts';
+import { LayoutDashboard, FolderKanban, FileSearch, Users, Shield, FlaskConical, Package, Activity } from 'lucide-react';
 
 export default function Dashboard() {
   const programs = store.getPrograms();
@@ -22,12 +25,12 @@ export default function Dashboard() {
   ];
 
   const activePrograms = programs.filter(p => p.status === 'active');
-  const recentAudit = audit.slice(0, 8);
+  const recentAudit = audit.slice(0, 6);
 
   return (
     <div>
-      <PageHeader title="Command Dashboard" subtitle="System Overview & Status" icon={LayoutDashboard} />
-      
+      <PageHeader title="Command Center" subtitle="Real-Time System Overview & Status" icon={LayoutDashboard} />
+
       <div className="p-6 space-y-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -42,8 +45,17 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Status Board */}
+        <StatusBoard />
+
+        {/* Mission Timeline + Priority Alerts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Active Programs */}
+          <MissionTimeline />
+          <PriorityAlerts />
+        </div>
+
+        {/* Active Programs + Recent Audit */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-card border border-border rounded">
             <div className="px-4 py-3 border-b border-border flex items-center gap-2">
               <FolderKanban className="w-4 h-4 text-primary" />
@@ -62,10 +74,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Recent Audit */}
           <div className="bg-card border border-border rounded">
             <div className="px-4 py-3 border-b border-border flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-tactical-amber" />
+              <Activity className="w-4 h-4 text-tactical-amber" />
               <span className="text-xs font-tactical text-muted-foreground">Recent Activity</span>
             </div>
             <div className="p-4 space-y-1">
@@ -82,7 +93,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Classification Summary */}
+        {/* Project Status Overview */}
         <div className="bg-card border border-border rounded">
           <div className="px-4 py-3 border-b border-border">
             <span className="text-xs font-tactical text-muted-foreground">Project Status Overview</span>
