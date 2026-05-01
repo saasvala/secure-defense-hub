@@ -84,29 +84,31 @@ export default function AuditLogs() {
             {filtered.map((a, idx) => {
               const info = getUserInfo(a.user_id);
               return (
-                <div key={a.id} className={`flex items-start gap-4 px-4 py-3 ${idx % 2 === 0 ? 'bg-secondary/5' : ''} border-b border-border/30 hover:bg-secondary/15 transition-colors`}>
-                  {/* Timeline dot */}
-                  <div className="flex flex-col items-center pt-1">
-                    <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                    {idx < filtered.length - 1 && <div className="w-px flex-1 bg-border mt-1" />}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-tactical text-primary">{a.action}</span>
-                      <ImmutableBadge state="immutable" />
+                <div key={a.id} className={`flex flex-col md:flex-row md:items-start gap-3 px-4 py-3 ${idx % 2 === 0 ? 'bg-secondary/5' : ''} border-b border-border/30 hover:bg-secondary/15 transition-colors`}>
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    {/* Timeline dot */}
+                    <div className="flex flex-col items-center pt-1">
+                      <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                      {idx < filtered.length - 1 && <div className="w-px flex-1 bg-border mt-1 hidden md:block" />}
                     </div>
-                    <p className="text-[11px] text-foreground/60">{a.details}</p>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-xs font-tactical text-primary">{a.action}</span>
+                        <ImmutableBadge state="immutable" />
+                      </div>
+                      <p className="text-[11px] text-foreground/60 break-words">{a.details}</p>
+                    </div>
                   </div>
 
-                  {/* Actor + Clearance Tag */}
-                  <div className="text-right shrink-0 space-y-1">
-                    <div className="flex items-center gap-1.5 justify-end">
+                  {/* Actor + Timestamp */}
+                  <div className="flex md:flex-col md:text-right md:items-end gap-2 md:gap-1 flex-wrap items-center md:shrink-0 md:w-[200px]">
+                    <div className="flex items-center gap-1.5">
                       <User className="w-3 h-3 text-muted-foreground" />
                       <span className="text-[10px] font-tactical text-foreground">{info.user?.username || a.user_id}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 justify-end">
+                    <div className="flex items-center gap-1.5">
                       <Shield className="w-3 h-3 text-muted-foreground" />
                       <span className="text-[9px] font-tactical text-muted-foreground">{info.role?.name || '—'}</span>
                     </div>
@@ -119,12 +121,10 @@ export default function AuditLogs() {
                         {info.clearance.level}
                       </span>
                     )}
+                    <span className="text-[10px] text-muted-foreground font-tactical tabular-nums">
+                      {new Date(a.date).toLocaleString()}
+                    </span>
                   </div>
-
-                  {/* Timestamp */}
-                  <span className="text-[10px] text-muted-foreground font-tactical tabular-nums shrink-0 pt-0.5">
-                    {new Date(a.date).toLocaleString()}
-                  </span>
                 </div>
               );
             })}
