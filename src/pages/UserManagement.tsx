@@ -62,7 +62,7 @@ export default function UserManagement() {
         }
       />
 
-      <div className="p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4">
         {/* Add User Form */}
         {showForm && (
           <div className="bg-card border border-primary/20 rounded p-4 glow-amber">
@@ -99,35 +99,40 @@ export default function UserManagement() {
 
         {/* Users Table */}
         <div className="bg-card border border-border rounded overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Username</th>
-                <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Role</th>
-                <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-right text-[10px] font-tactical text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(u => (
-                <tr key={u.id} className="border-b border-border/50 hover:bg-secondary/20 transition-colors">
-                  <td className="px-4 py-3 text-xs font-tactical text-foreground">{u.username}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{getRoleName(u.role_id)}</td>
-                  <td className="px-4 py-3"><StatusBadge status={u.status} /></td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => resetUser(u.id)} className="p-1 text-muted-foreground hover:text-primary transition-colors" title="Reset">
-                        <RotateCcw className="w-3 h-3" />
-                      </button>
-                      <button onClick={() => toggleStatus(u.id)} className="p-1 text-muted-foreground hover:text-destructive transition-colors" title="Toggle Status">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px]">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Username</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Role</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-right text-[10px] font-tactical text-muted-foreground">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {users.map(u => (
+                  <tr key={u.id} className="border-b border-border/50 hover:bg-secondary/20 transition-colors">
+                    <td className="px-4 py-3 text-xs font-tactical text-foreground">{u.username}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{getRoleName(u.role_id)}</td>
+                    <td className="px-4 py-3"><StatusBadge status={u.status} /></td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => resetUser(u.id)} className="p-1.5 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Reset password">
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => toggleStatus(u.id)} className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Toggle status">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {users.length === 0 && (
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">No users registered</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

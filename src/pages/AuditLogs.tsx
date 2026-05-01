@@ -61,7 +61,7 @@ export default function AuditLogs() {
           </button>
         }
       />
-      <div className="p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4">
         {/* Filter Bar */}
         <div className="flex items-center gap-3">
           <Filter className="w-4 h-4 text-muted-foreground" />

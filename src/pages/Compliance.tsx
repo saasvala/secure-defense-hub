@@ -32,7 +32,7 @@ export default function Compliance() {
   return (
     <div>
       <PageHeader title="Compliance & Risk" subtitle="Regulatory compliance monitoring" icon={ShieldCheck} />
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         {/* Violation Alerts Banner */}
         {violations.length > 0 && (
           <div className="bg-destructive/5 border border-destructive/20 rounded p-4 flex items-start gap-3">

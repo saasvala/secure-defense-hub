@@ -86,7 +86,7 @@ export default function Backup() {
           </div>
         }
       />
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         {/* Offline Hardening Indicators */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Sync-Free Indicator */}
@@ -170,29 +170,31 @@ export default function Backup() {
             <HardDrive className="w-4 h-4 text-primary" />
             <span className="text-xs font-tactical text-muted-foreground">Backup History</span>
           </div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Date</th>
-                <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Size</th>
-                <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">State</th>
-              </tr>
-            </thead>
-            <tbody>
-              {backups.map(b => (
-                <tr key={b.id} className="border-b border-border/50">
-                  <td className="px-4 py-3 text-xs text-foreground">{new Date(b.date).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{b.size}</td>
-                  <td className="px-4 py-3 text-xs text-tactical-green font-tactical">{b.status}</td>
-                  <td className="px-4 py-3"><ImmutableBadge state="immutable" /></td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px]">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Date</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Size</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-tactical text-muted-foreground">State</th>
                 </tr>
-              ))}
-              {backups.length === 0 && (
-                <tr><td colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">No backups created yet</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {backups.map(b => (
+                  <tr key={b.id} className="border-b border-border/50">
+                    <td className="px-4 py-3 text-xs text-foreground">{new Date(b.date).toLocaleString()}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{b.size}</td>
+                    <td className="px-4 py-3 text-xs text-tactical-green font-tactical">{b.status}</td>
+                    <td className="px-4 py-3"><ImmutableBadge state="immutable" /></td>
+                  </tr>
+                ))}
+                {backups.length === 0 && (
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">No backups created yet</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
