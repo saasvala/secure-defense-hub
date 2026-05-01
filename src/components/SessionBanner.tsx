@@ -25,43 +25,43 @@ export default function SessionBanner() {
   const isSecure = sessionIntegrity === 'secure';
 
   return (
-    <div className={`flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-tactical ${
+    <div className={`flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 border-b text-[10px] font-tactical overflow-x-auto ${
       isSecure
         ? 'bg-tactical-green/5 border-tactical-green/20 text-tactical-green'
         : 'bg-destructive/5 border-destructive/20 text-destructive'
     }`}>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
         {/* Session Status */}
         <div className="flex items-center gap-1.5">
           {isSecure ? <ShieldCheck className="w-3 h-3" /> : <ShieldAlert className="w-3 h-3" />}
-          <span>{isSecure ? 'SESSION SECURE' : 'SESSION COMPROMISED'}</span>
+          <span className="whitespace-nowrap">{isSecure ? 'SECURE' : 'COMPROMISED'}</span>
         </div>
 
         {/* Device Bind */}
-        <div className="flex items-center gap-1.5 text-muted-foreground">
+        <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground">
           <Lock className="w-3 h-3" />
           <span>DEVICE-BOUND</span>
         </div>
 
         {/* Offline Indicator */}
-        <div className="flex items-center gap-1.5 text-muted-foreground">
+        <div className="hidden md:flex items-center gap-1.5 text-muted-foreground">
           <WifiOff className="w-3 h-3" />
           <span>OFFLINE MODE</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
         {/* License Info */}
-        <div className="flex items-center gap-1.5 text-muted-foreground">
+        <div className="hidden lg:flex items-center gap-1.5 text-muted-foreground">
           <Activity className="w-3 h-3" />
           <span>KEY: {license?.key?.slice(0, 12)}…</span>
         </div>
 
         {/* Clearance Level */}
-        <span className="text-primary">{currentRole?.name || '—'}</span>
+        <span className="text-primary hidden sm:inline truncate max-w-[140px]">{currentRole?.name || '—'}</span>
 
         {/* Clock */}
-        <span className="text-muted-foreground tabular-nums">
+        <span className="text-muted-foreground tabular-nums whitespace-nowrap">
           {time.toLocaleTimeString('en-US', { hour12: false })}
         </span>
       </div>

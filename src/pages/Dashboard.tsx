@@ -31,7 +31,7 @@ export default function Dashboard() {
     <div>
       <PageHeader title="Command Center" subtitle="Real-Time System Overview & Status" icon={LayoutDashboard} />
 
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {stats.map(s => (

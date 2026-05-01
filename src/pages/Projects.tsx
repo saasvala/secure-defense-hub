@@ -2,6 +2,7 @@ import { store } from '@/lib/store';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { FileSearch, GitBranch, AlertTriangle, ArrowRight } from 'lucide-react';
 
 const RISK_LEVELS: Record<string, { label: string; color: string }> = {
@@ -21,7 +22,10 @@ export default function Projects() {
   return (
     <div>
       <PageHeader title="Classified Projects" subtitle={`${projects.length} projects registered`} icon={FileSearch} />
-      <div className="p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4">
+        {projects.length === 0 && (
+          <EmptyState icon={FileSearch} title="NO PROJECTS" message="No classified projects registered yet." />
+        )}
         {projects.map(p => {
           const prog = programs.find(pr => pr.id === p.program_id);
           const protos = prototypes.filter(pt => pt.project_id === p.id);
@@ -31,16 +35,16 @@ export default function Projects() {
 
           return (
             <div key={p.id} className="bg-card border border-border rounded overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <FileSearch className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-tactical text-primary">{p.code_name}</span>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-4 py-3 border-b border-border">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <FileSearch className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-tactical text-primary truncate">{p.code_name}</span>
                   <StatusBadge status={p.status} />
                   <ImmutableBadge state="versioned" />
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <span className={`text-[10px] font-tactical ${risk.color}`}>RISK: {risk.label}</span>
-                  <span className="text-[10px] text-muted-foreground">{prog?.name}</span>
+                  <span className="text-[10px] text-muted-foreground truncate max-w-[200px]">{prog?.name}</span>
                 </div>
               </div>
 

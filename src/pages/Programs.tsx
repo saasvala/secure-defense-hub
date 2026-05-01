@@ -2,6 +2,7 @@ import { store } from '@/lib/store';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { FolderKanban, ChevronRight, CheckCircle2, Clock, XCircle, AlertTriangle } from 'lucide-react';
 
 const STAGE_GATES = [
@@ -32,33 +33,36 @@ export default function Programs() {
   return (
     <div>
       <PageHeader title="Defense Programs" subtitle={`${programs.length} registered programs`} icon={FolderKanban} />
-      <div className="p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4">
+        {programs.length === 0 && (
+          <EmptyState icon={FolderKanban} title="NO PROGRAMS" message="No defense programs registered yet." />
+        )}
         {programs.map(p => {
           const stageIdx = getStageIndex(p.status);
           return (
             <div key={p.id} className="bg-card border border-border rounded overflow-hidden">
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <FolderKanban className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-tactical text-foreground">{p.name}</span>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-4 py-3 border-b border-border">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <FolderKanban className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-xs font-tactical text-foreground truncate">{p.name}</span>
                   <StatusBadge status={p.classification} />
                   <StatusBadge status={p.status} />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <ImmutableBadge state="versioned" />
                   <span className="text-[10px] text-muted-foreground">{p.created_at}</span>
                 </div>
               </div>
 
               {/* Stage Gates */}
-              <div className="px-4 py-3 bg-secondary/10">
-                <div className="flex items-center gap-1">
+              <div className="px-4 py-3 bg-secondary/10 overflow-x-auto">
+                <div className="flex items-center gap-1 flex-wrap">
                   {STAGE_GATES.map((gate, i) => (
                     <div key={gate.key} className="flex items-center gap-1">
                       <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-secondary/30">
                         <StageIcon passed={i < stageIdx} current={i === stageIdx} />
-                        <span className={`text-[9px] font-tactical ${i <= stageIdx ? 'text-foreground' : 'text-muted-foreground/40'}`}>
+                        <span className={`text-[9px] font-tactical whitespace-nowrap ${i <= stageIdx ? 'text-foreground' : 'text-muted-foreground/40'}`}>
                           {gate.name}
                         </span>
                       </div>

@@ -24,15 +24,24 @@ const ADMIN_ITEMS = [
   { path: '/users', label: 'User Mgmt', icon: Users },
 ];
 
-export default function AppSidebar() {
+interface Props {
+  onNavigate?: () => void;
+}
+
+export default function AppSidebar({ onNavigate }: Props) {
   const { currentUser, currentRole, logout, isSuperAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const items = isSuperAdmin ? [...NAV_ITEMS, ...ADMIN_ITEMS] : NAV_ITEMS;
 
+  const handleNav = (path: string) => {
+    navigate(path);
+    onNavigate?.();
+  };
+
   return (
-    <aside className="w-60 min-h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
+    <aside className="w-60 h-screen bg-sidebar border-r border-sidebar-border flex flex-col sticky top-0">
       {/* Header */}
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
@@ -51,7 +60,7 @@ export default function AppSidebar() {
           return (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNav(item.path)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs font-tactical transition-all group ${
                 active
                   ? 'bg-sidebar-accent text-sidebar-primary border-l-2 border-sidebar-primary'

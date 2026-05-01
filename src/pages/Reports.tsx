@@ -32,17 +32,18 @@ export default function Reports() {
   return (
     <div>
       <PageHeader title="Reports & Export" subtitle="Generate and download reports" icon={FileBarChart} />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {reports.map(r => (
-            <div key={r.name} className="bg-card border border-border rounded p-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-xs font-tactical text-foreground">{r.name}</h3>
+            <div key={r.name} className="bg-card border border-border rounded p-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="text-xs font-tactical text-foreground truncate">{r.name}</h3>
                 <p className="text-[10px] text-muted-foreground mt-1">{r.count} records</p>
               </div>
               <button
                 onClick={() => exportCSV(r.data, r.file)}
-                className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground text-xs font-tactical rounded hover:bg-secondary/80 transition-colors"
+                disabled={r.count === 0}
+                className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground text-xs font-tactical rounded hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
               >
                 <Download className="w-3 h-3" /> Export CSV
               </button>
