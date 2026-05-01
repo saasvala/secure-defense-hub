@@ -2,6 +2,7 @@ import { store } from '@/lib/store';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { Cpu, GitCommit, ArrowDown } from 'lucide-react';
 
 export default function Prototypes() {
@@ -18,7 +19,10 @@ export default function Prototypes() {
   return (
     <div>
       <PageHeader title="Prototype Development" subtitle={`${prototypes.length} prototypes tracked`} icon={Cpu} />
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
+        {prototypes.length === 0 && (
+          <EmptyState icon={Cpu} title="NO PROTOTYPES" message="No prototype versions tracked yet." />
+        )}
         {Object.entries(byProject).map(([projId, protos]) => {
           const project = projects.find(p => p.id === projId);
           return (

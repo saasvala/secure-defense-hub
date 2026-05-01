@@ -2,6 +2,7 @@ import { store } from '@/lib/store';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { Package, Wrench, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 
 const LIFECYCLE_FLAGS: Record<string, { icon: typeof CheckCircle2; label: string; color: string }> = {
@@ -17,7 +18,10 @@ export default function Assets() {
   return (
     <div>
       <PageHeader title="Inventory & Assets" subtitle={`${assets.length} assets tracked`} icon={Package} />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
+        {assets.length === 0 && (
+          <EmptyState icon={Package} title="NO ASSETS" message="No assets in inventory yet." />
+        )}
         {/* Summary Cards */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-card border border-tactical-green/20 rounded p-3">
@@ -47,14 +51,14 @@ export default function Assets() {
                 a.status === 'decommissioned' ? 'border-border' :
                 'border-border'
               }`}>
-                <div className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <Package className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-tactical text-foreground">{a.name}</span>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-4 py-3">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <Package className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-xs font-tactical text-foreground truncate">{a.name}</span>
                     <span className="text-[10px] text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded">{a.type}</span>
                     <StatusBadge status={a.status} />
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     {/* Lifecycle Flag */}
                     <div className="flex items-center gap-1.5">
                       <LcIcon className={`w-3 h-3 ${lifecycle.color}`} />

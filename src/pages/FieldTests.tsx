@@ -2,6 +2,7 @@ import { store } from '@/lib/store';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { FlaskConical, CheckCircle2, XCircle, Clock, AlertTriangle, MapPin } from 'lucide-react';
 
 const VALIDATION_STATES: Record<string, { icon: typeof CheckCircle2; label: string; color: string }> = {
@@ -18,7 +19,10 @@ export default function FieldTests() {
   return (
     <div>
       <PageHeader title="Field Trials & Testing" subtitle={`${tests.length} tests logged`} icon={FlaskConical} />
-      <div className="p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4">
+        {tests.length === 0 && (
+          <EmptyState icon={FlaskConical} title="NO FIELD TESTS" message="No field trials logged yet." />
+        )}
         {tests.map(t => {
           const project = projects.find(p => p.id === t.project_id);
           const validation = VALIDATION_STATES[t.outcome] || VALIDATION_STATES.pending;
