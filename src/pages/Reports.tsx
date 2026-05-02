@@ -1,4 +1,5 @@
 import { store } from '@/lib/store';
+import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import { FileBarChart, Download } from 'lucide-react';
 
@@ -9,17 +10,20 @@ export default function Reports() {
   const tests = store.getFieldTests();
 
   const exportCSV = (data: any[], filename: string) => {
-    if (data.length === 0) return;
-    const headers = Object.keys(data[0]).join(',');
-    const rows = data.map(d => Object.values(d).join(',')).join('\n');
-    const blob = new Blob([headers + '\n' + rows], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    store.addAudit({ user_id: store.getCurrentUser()?.id || 'unknown', action: 'EXPORT', details: `Exported ${filename}` });
+    if (data.length === 0) { toast.error('No records to export'); return; }
+    try {
+      const headers = Object.keys(data[0]).join(',');
+      const rows = data.map(d => Object.values(d).map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([headers + '\n' + rows], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${filename}.csv`; a.click();
+      URL.revokeObjectURL(url);
+      store.addAudit({ user_id: store.getCurrentUser()?.id || 'unknown', action: 'EXPORT', details: `Exported ${filename}` });
+      toast.success(`${filename}.csv exported (${data.length} records)`);
+    } catch (e) {
+      toast.error('Export failed');
+    }
   };
 
   const reports = [
