@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { store, genId } from '@/lib/store';
+import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import ImmutableBadge from '@/components/ImmutableBadge';
 import { HardDrive, Download, Upload, ShieldCheck, AlertTriangle, RefreshCw, CheckCircle2 } from 'lucide-react';
@@ -30,6 +31,7 @@ export default function Backup() {
     URL.revokeObjectURL(url);
 
     store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'BACKUP_CREATED', details: `Size: ${size}` });
+    toast.success(`Backup created (${size})`);
   };
 
   const restoreBackup = () => {
@@ -45,8 +47,9 @@ export default function Backup() {
           const data = JSON.parse(ev.target?.result as string);
           Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v as string));
           store.addAudit({ user_id: 'system', action: 'BACKUP_RESTORED', details: `From file: ${file.name}` });
-          window.location.reload();
-        } catch { alert('Invalid backup file'); }
+          toast.success('Backup restored — reloading');
+          setTimeout(() => window.location.reload(), 800);
+        } catch { toast.error('Invalid backup file'); }
       };
       reader.readAsText(file);
     };

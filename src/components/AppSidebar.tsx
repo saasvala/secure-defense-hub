@@ -1,27 +1,25 @@
 import { useAuth } from '@/context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { can, type ModuleKey } from '@/lib/permissions';
 import {
   Shield, LayoutDashboard, FolderKanban, FileSearch, Cpu,
   FlaskConical, KeyRound, ShieldCheck, Package, FileBarChart,
   ClipboardList, HardDrive, Users, LogOut, ChevronRight
 } from 'lucide-react';
 
-const NAV_ITEMS = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/programs', label: 'Programs', icon: FolderKanban },
-  { path: '/projects', label: 'Projects', icon: FileSearch },
-  { path: '/prototypes', label: 'Prototypes', icon: Cpu },
-  { path: '/field-tests', label: 'Field Tests', icon: FlaskConical },
-  { path: '/clearance', label: 'Clearance', icon: KeyRound },
-  { path: '/compliance', label: 'Compliance', icon: ShieldCheck },
-  { path: '/assets', label: 'Assets', icon: Package },
-  { path: '/reports', label: 'Reports', icon: FileBarChart },
-  { path: '/audit', label: 'Audit Logs', icon: ClipboardList },
-  { path: '/backup', label: 'Backup', icon: HardDrive },
-];
-
-const ADMIN_ITEMS = [
-  { path: '/users', label: 'User Mgmt', icon: Users },
+const ALL_ITEMS: { path: string; label: string; icon: typeof Shield; module: ModuleKey }[] = [
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, module: 'dashboard' },
+  { path: '/programs', label: 'Programs', icon: FolderKanban, module: 'programs' },
+  { path: '/projects', label: 'Projects', icon: FileSearch, module: 'projects' },
+  { path: '/prototypes', label: 'Prototypes', icon: Cpu, module: 'prototypes' },
+  { path: '/field-tests', label: 'Field Tests', icon: FlaskConical, module: 'field-tests' },
+  { path: '/clearance', label: 'Clearance', icon: KeyRound, module: 'clearance' },
+  { path: '/compliance', label: 'Compliance', icon: ShieldCheck, module: 'compliance' },
+  { path: '/assets', label: 'Assets', icon: Package, module: 'assets' },
+  { path: '/reports', label: 'Reports', icon: FileBarChart, module: 'reports' },
+  { path: '/audit', label: 'Audit Logs', icon: ClipboardList, module: 'audit' },
+  { path: '/backup', label: 'Backup', icon: HardDrive, module: 'backup' },
+  { path: '/users', label: 'User Mgmt', icon: Users, module: 'users' },
 ];
 
 interface Props {
@@ -29,11 +27,11 @@ interface Props {
 }
 
 export default function AppSidebar({ onNavigate }: Props) {
-  const { currentUser, currentRole, logout, isSuperAdmin } = useAuth();
+  const { currentUser, currentRole, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const items = isSuperAdmin ? [...NAV_ITEMS, ...ADMIN_ITEMS] : NAV_ITEMS;
+  const items = ALL_ITEMS.filter(i => can(currentRole?.name, i.module, 'view'));
 
   const handleNav = (path: string) => {
     navigate(path);

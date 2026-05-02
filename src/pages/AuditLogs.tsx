@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { store } from '@/lib/store';
+import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import ImmutableBadge from '@/components/ImmutableBadge';
 import { ClipboardList, Download, User, Shield, Filter } from 'lucide-react';
@@ -44,6 +45,7 @@ export default function AuditLogs() {
     a.click();
     URL.revokeObjectURL(url);
     store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'FORENSIC_EXPORT', details: `Exported ${filtered.length} entries` });
+    toast.success(`Forensic bundle exported (${filtered.length} entries)`);
   };
 
   return (
