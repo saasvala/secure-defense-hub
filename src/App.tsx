@@ -22,6 +22,8 @@ import AuditLogs from "@/pages/AuditLogs";
 import Backup from "@/pages/Backup";
 import UserManagement from "@/pages/UserManagement";
 import NotFound from "./pages/NotFound";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import RouteGuard from "@/components/RouteGuard";
 
 const queryClient = new QueryClient();
 
@@ -39,18 +41,18 @@ function AppRoutes() {
     <AppLayout>
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/programs" element={<Programs />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/prototypes" element={<Prototypes />} />
-        <Route path="/field-tests" element={<FieldTests />} />
-        <Route path="/clearance" element={<ClearanceRecords />} />
-        <Route path="/compliance" element={<Compliance />} />
-        <Route path="/assets" element={<Assets />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/audit" element={<AuditLogs />} />
-        <Route path="/backup" element={<Backup />} />
-        <Route path="/users" element={<UserManagement />} />
+        <Route path="/dashboard" element={<RouteGuard module="dashboard"><Dashboard /></RouteGuard>} />
+        <Route path="/programs" element={<RouteGuard module="programs"><Programs /></RouteGuard>} />
+        <Route path="/projects" element={<RouteGuard module="projects"><Projects /></RouteGuard>} />
+        <Route path="/prototypes" element={<RouteGuard module="prototypes"><Prototypes /></RouteGuard>} />
+        <Route path="/field-tests" element={<RouteGuard module="field-tests"><FieldTests /></RouteGuard>} />
+        <Route path="/clearance" element={<RouteGuard module="clearance"><ClearanceRecords /></RouteGuard>} />
+        <Route path="/compliance" element={<RouteGuard module="compliance"><Compliance /></RouteGuard>} />
+        <Route path="/assets" element={<RouteGuard module="assets"><Assets /></RouteGuard>} />
+        <Route path="/reports" element={<RouteGuard module="reports"><Reports /></RouteGuard>} />
+        <Route path="/audit" element={<RouteGuard module="audit"><AuditLogs /></RouteGuard>} />
+        <Route path="/backup" element={<RouteGuard module="backup"><Backup /></RouteGuard>} />
+        <Route path="/users" element={<RouteGuard module="users"><UserManagement /></RouteGuard>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
@@ -62,11 +64,13 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
 );
