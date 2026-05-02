@@ -143,11 +143,19 @@ export default function UserManagement() {
                     <td className="px-4 py-3 text-xs text-muted-foreground">{getRoleName(u.role_id)}</td>
                     <td className="px-4 py-3"><StatusBadge status={u.status} /></td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
                         <button onClick={() => resetUser(u.id)} className="p-1.5 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Reset password">
                           <RotateCcw className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => toggleStatus(u.id)} className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Toggle status">
+                        <button onClick={() => toggleStatus(u.id)} className="p-1.5 rounded text-muted-foreground hover:text-tactical-amber hover:bg-tactical-amber/10 transition-colors" title="Toggle active">
+                          <Power className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(u.id)}
+                          disabled={u.id === currentUser?.id}
+                          className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          title={u.id === currentUser?.id ? 'Cannot delete current session' : 'Delete user'}
+                        >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -162,6 +170,15 @@ export default function UserManagement() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="DELETE USER"
+        message="This will permanently remove the user account. Action is logged."
+        destructive confirmLabel="DELETE"
+        onConfirm={deleteUser}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
