@@ -1,30 +1,41 @@
 import { useState } from 'react';
 import { store, genId, type User } from '@/lib/store';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
-import { Users, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Users, Plus, RotateCcw, Power, Trash2 } from 'lucide-react';
 
 export default function UserManagement() {
+  const { currentUser } = useAuth();
   const [users, setUsers] = useState(store.getUsers());
   const roles = store.getRoles();
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ username: '', password: '', role_id: roles[1]?.id || '' });
+  const defaultRole = roles.find(r => r.name !== 'Super Admin')?.id || '';
+  const [form, setForm] = useState({ username: '', password: '', role_id: defaultRole });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const refresh = () => setUsers(store.getUsers());
 
   const addUser = () => {
-    if (!form.username || !form.password || !form.role_id) return;
+    if (!form.username.trim() || !form.password.trim() || !form.role_id) {
+      toast.error('All fields are required'); return;
+    }
+    if (form.password.length < 6) {
+      toast.error('Password must be at least 6 characters'); return;
+    }
+    if (store.getUsers().some(u => u.username === form.username.trim())) {
+      toast.error('Username already exists'); return;
+    }
     const newUser: User = {
-      id: genId(),
-      role_id: form.role_id,
-      username: form.username,
-      password: form.password,
-      status: 'active',
+      id: genId(), role_id: form.role_id,
+      username: form.username.trim(), password: form.password, status: 'active',
     };
-    const updated = [...store.getUsers(), newUser];
-    store.setUsers(updated);
-    store.addAudit({ user_id: 'admin', action: 'USER_CREATED', details: `Created user: ${form.username}` });
-    setForm({ username: '', password: '', role_id: roles[1]?.id || '' });
+    store.setUsers([...store.getUsers(), newUser]);
+    store.addAudit({ user_id: currentUser?.id || 'admin', action: 'USER_CREATED', details: `Created user: ${newUser.username}` });
+    toast.success(`User "${newUser.username}" created`);
+    setForm({ username: '', password: '', role_id: defaultRole });
     setShowForm(false);
     refresh();
   };
@@ -32,7 +43,8 @@ export default function UserManagement() {
   const resetUser = (id: string) => {
     const updated = store.getUsers().map(u => u.id === id ? { ...u, password: 'reset123!', status: 'active' as const } : u);
     store.setUsers(updated);
-    store.addAudit({ user_id: 'admin', action: 'USER_RESET', details: `Reset user ID: ${id}` });
+    store.addAudit({ user_id: currentUser?.id || 'admin', action: 'USER_RESET', details: `Reset user ID: ${id}` });
+    toast.success('Password reset to: reset123!');
     refresh();
   };
 
@@ -41,6 +53,21 @@ export default function UserManagement() {
       u.id === id ? { ...u, status: (u.status === 'active' ? 'inactive' : 'active') as 'active' | 'inactive' } : u
     );
     store.setUsers(updated);
+    store.addAudit({ user_id: currentUser?.id || 'admin', action: 'USER_STATUS_TOGGLED', details: `User ID: ${id}` });
+    toast.success('User status updated');
+    refresh();
+  };
+
+  const deleteUser = () => {
+    if (!deleteId) return;
+    if (deleteId === currentUser?.id) {
+      toast.error('Cannot delete the active session user'); setDeleteId(null); return;
+    }
+    const target = users.find(u => u.id === deleteId);
+    store.setUsers(store.getUsers().filter(u => u.id !== deleteId));
+    store.addAudit({ user_id: currentUser?.id || 'admin', action: 'USER_DELETED', details: `Deleted: ${target?.username}` });
+    toast.success(`User "${target?.username}" deleted`);
+    setDeleteId(null);
     refresh();
   };
 
