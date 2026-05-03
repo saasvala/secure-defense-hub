@@ -16,9 +16,12 @@ const DEFAULT_ROLES: Role[] = [
 ];
 
 export function seedData() {
-  // Seed roles
-  if (store.getRoles().length === 0) {
-    store.setRoles(DEFAULT_ROLES);
+  // Seed/merge roles — ensure all default roles exist (do not overwrite existing ones)
+  const existingRoles = store.getRoles();
+  const existingNames = new Set(existingRoles.map(r => r.name));
+  const missing = DEFAULT_ROLES.filter(r => !existingNames.has(r.name));
+  if (missing.length > 0) {
+    store.setRoles([...existingRoles, ...missing]);
   }
 
   const roles = store.getRoles();
