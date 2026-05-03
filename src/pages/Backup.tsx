@@ -47,15 +47,19 @@ export default function Backup() {
     input.type = 'file';
     input.accept = '.json';
     input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files?.[0];
+      if (!file) { toast.error('No file selected'); return; }
       const reader = new FileReader();
+      reader.onerror = () => toast.error('Failed to read backup file');
       reader.onload = (ev) => {
         try {
           const data = JSON.parse(ev.target?.result as string);
-          Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v as string));
+          if (!data || typeof data !== 'object') throw new Error('bad');
+          const keys = Object.keys(data).filter(k => k.startsWith('dro_'));
+          if (keys.length === 0) { toast.error('Backup file contains no DRO data'); return; }
+          keys.forEach(k => localStorage.setItem(k, data[k] as string));
           store.addAudit({ user_id: 'system', action: 'BACKUP_RESTORED', details: `From file: ${file.name}` });
-          toast.success('Backup restored — reloading');
+          toast.success(`Backup restored (${keys.length} keys) — reloading`);
           setTimeout(() => window.location.reload(), 800);
         } catch { toast.error('Invalid backup file'); }
       };
@@ -67,10 +71,15 @@ export default function Backup() {
   const runIntegrityCheck = () => {
     setIntegrityStatus('checking');
     setTimeout(() => {
-      // Verify all required keys exist
-      const requiredKeys = ['license', 'users', 'roles', 'setup_complete'];
-      const allPresent = requiredKeys.every(k => localStorage.getItem('dro_' + k) !== null);
-      setIntegrityStatus(allPresent ? 'pass' : 'fail');
+      try {
+        const requiredKeys = ['license', 'users', 'roles', 'setup_complete'];
+        const allPresent = requiredKeys.every(k => localStorage.getItem('dro_' + k) !== null);
+        setIntegrityStatus(allPresent ? 'pass' : 'fail');
+        if (!allPresent) toast.error('Integrity check failed — missing required data');
+      } catch {
+        setIntegrityStatus('fail');
+        toast.error('Integrity check could not complete');
+      }
     }, 1500);
   };
 
