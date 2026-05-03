@@ -24,6 +24,8 @@ export default function AuditLogs() {
   };
 
   const exportForensicBundle = () => {
+    if (filtered.length === 0) { toast.error('No audit entries to export'); return; }
+    try {
     const bundle = {
       export_date: new Date().toISOString(),
       export_type: 'FORENSIC_BUNDLE',
