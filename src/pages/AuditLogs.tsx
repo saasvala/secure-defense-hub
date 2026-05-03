@@ -3,6 +3,7 @@ import { store } from '@/lib/store';
 import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { ClipboardList, Download, User, Shield, Filter } from 'lucide-react';
 
 export default function AuditLogs() {
@@ -23,6 +24,8 @@ export default function AuditLogs() {
   };
 
   const exportForensicBundle = () => {
+    if (filtered.length === 0) { toast.error('No audit entries to export'); return; }
+    try {
     const bundle = {
       export_date: new Date().toISOString(),
       export_type: 'FORENSIC_BUNDLE',
@@ -46,6 +49,9 @@ export default function AuditLogs() {
     URL.revokeObjectURL(url);
     store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'FORENSIC_EXPORT', details: `Exported ${filtered.length} entries` });
     toast.success(`Forensic bundle exported (${filtered.length} entries)`);
+    } catch {
+      toast.error('Forensic export failed');
+    }
   };
 
   return (
@@ -131,7 +137,9 @@ export default function AuditLogs() {
               );
             })}
             {filtered.length === 0 && (
-              <div className="px-4 py-8 text-center text-xs text-muted-foreground">No audit entries</div>
+              <div className="p-2">
+                <EmptyState icon={ClipboardList} title="NO AUDIT ENTRIES" message={filterAction ? `No entries match action "${filterAction}".` : 'No system activity has been recorded yet.'} />
+              </div>
             )}
           </div>
         </div>

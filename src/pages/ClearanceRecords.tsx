@@ -8,6 +8,7 @@ import ClearanceMatrix from '@/components/ClearanceMatrix';
 import ImmutableBadge from '@/components/ImmutableBadge';
 import CrudModal, { type FieldDef } from '@/components/CrudModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import EmptyState from '@/components/EmptyState';
 import { toast } from 'sonner';
 import { KeyRound, Shield, Plus, Pencil, Trash2 } from 'lucide-react';
 
@@ -139,7 +140,9 @@ export default function ClearanceRecords() {
                   );
                 })}
                 {clearances.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground">No clearance records</td></tr>
+                  <tr><td colSpan={6} className="p-0">
+                    <EmptyState icon={KeyRound} title="NO CLEARANCES" message="No personnel clearance records on file." />
+                  </td></tr>
                 )}
               </tbody>
             </table>

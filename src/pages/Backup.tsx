@@ -3,6 +3,7 @@ import { store, genId } from '@/lib/store';
 import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { HardDrive, Download, Upload, ShieldCheck, AlertTriangle, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export default function Backup() {
@@ -11,27 +12,35 @@ export default function Backup() {
   const [showRecovery, setShowRecovery] = useState(false);
 
   const createBackup = () => {
-    const allData: Record<string, any> = {};
-    Object.keys(localStorage).forEach(k => {
-      if (k.startsWith('dro_')) allData[k] = localStorage.getItem(k);
-    });
-    const blob = new Blob([JSON.stringify(allData)], { type: 'application/json' });
-    const size = (blob.size / 1024).toFixed(1) + ' KB';
+    try {
+      const allData: Record<string, any> = {};
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('dro_')) allData[k] = localStorage.getItem(k);
+      });
+      if (Object.keys(allData).length === 0) {
+        toast.error('No system data available to back up');
+        return;
+      }
+      const blob = new Blob([JSON.stringify(allData)], { type: 'application/json' });
+      const size = (blob.size / 1024).toFixed(1) + ' KB';
 
-    const entry = { id: genId(), date: new Date().toISOString(), size, status: 'completed' as const };
-    const updated = [entry, ...backups];
-    store.setBackups(updated);
-    setBackups(updated);
+      const entry = { id: genId(), date: new Date().toISOString(), size, status: 'completed' as const };
+      const updated = [entry, ...backups];
+      store.setBackups(updated);
+      setBackups(updated);
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dro_backup_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dro_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
 
-    store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'BACKUP_CREATED', details: `Size: ${size}` });
-    toast.success(`Backup created (${size})`);
+      store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'BACKUP_CREATED', details: `Size: ${size}` });
+      toast.success(`Backup created (${size})`);
+    } catch (err) {
+      toast.error('Backup failed — system data unreachable');
+    }
   };
 
   const restoreBackup = () => {
@@ -39,15 +48,19 @@ export default function Backup() {
     input.type = 'file';
     input.accept = '.json';
     input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files?.[0];
+      if (!file) { toast.error('No file selected'); return; }
       const reader = new FileReader();
+      reader.onerror = () => toast.error('Failed to read backup file');
       reader.onload = (ev) => {
         try {
           const data = JSON.parse(ev.target?.result as string);
-          Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v as string));
+          if (!data || typeof data !== 'object') throw new Error('bad');
+          const keys = Object.keys(data).filter(k => k.startsWith('dro_'));
+          if (keys.length === 0) { toast.error('Backup file contains no DRO data'); return; }
+          keys.forEach(k => localStorage.setItem(k, data[k] as string));
           store.addAudit({ user_id: 'system', action: 'BACKUP_RESTORED', details: `From file: ${file.name}` });
-          toast.success('Backup restored — reloading');
+          toast.success(`Backup restored (${keys.length} keys) — reloading`);
           setTimeout(() => window.location.reload(), 800);
         } catch { toast.error('Invalid backup file'); }
       };
@@ -59,10 +72,15 @@ export default function Backup() {
   const runIntegrityCheck = () => {
     setIntegrityStatus('checking');
     setTimeout(() => {
-      // Verify all required keys exist
-      const requiredKeys = ['license', 'users', 'roles', 'setup_complete'];
-      const allPresent = requiredKeys.every(k => localStorage.getItem('dro_' + k) !== null);
-      setIntegrityStatus(allPresent ? 'pass' : 'fail');
+      try {
+        const requiredKeys = ['license', 'users', 'roles', 'setup_complete'];
+        const allPresent = requiredKeys.every(k => localStorage.getItem('dro_' + k) !== null);
+        setIntegrityStatus(allPresent ? 'pass' : 'fail');
+        if (!allPresent) toast.error('Integrity check failed — missing required data');
+      } catch {
+        setIntegrityStatus('fail');
+        toast.error('Integrity check could not complete');
+      }
     }, 1500);
   };
 
@@ -193,7 +211,9 @@ export default function Backup() {
                   </tr>
                 ))}
                 {backups.length === 0 && (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">No backups created yet</td></tr>
+                  <tr><td colSpan={4} className="p-0">
+                    <EmptyState icon={HardDrive} title="NO BACKUPS" message="No system backups recorded yet. Use Create Backup to generate one." />
+                  </td></tr>
                 )}
               </tbody>
             </table>

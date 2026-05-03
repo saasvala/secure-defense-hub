@@ -3,6 +3,7 @@ import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import StatusBoard from '@/components/StatusBoard';
 import MissionTimeline from '@/components/MissionTimeline';
+import EmptyState from '@/components/EmptyState';
 import PriorityAlerts from '@/components/PriorityAlerts';
 import { LayoutDashboard, FolderKanban, FileSearch, Users, Shield, FlaskConical, Package, Activity } from 'lucide-react';
 
@@ -69,7 +70,7 @@ export default function Dashboard() {
                 </div>
               ))}
               {activePrograms.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">No active programs</p>
+                <EmptyState icon={FolderKanban} title="NO ACTIVE PROGRAMS" message="No programs currently in active status." />
               )}
             </div>
           </div>
@@ -87,7 +88,7 @@ export default function Dashboard() {
                 </div>
               ))}
               {recentAudit.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">No activity logged</p>
+                <EmptyState icon={Activity} title="NO ACTIVITY" message="No recent system activity logged." />
               )}
             </div>
           </div>
@@ -99,20 +100,24 @@ export default function Dashboard() {
             <span className="text-xs font-tactical text-muted-foreground">Project Status Overview</span>
           </div>
           <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {projects.map(p => {
-                const prog = programs.find(pr => pr.id === p.program_id);
-                return (
-                  <div key={p.id} className="flex items-center justify-between p-3 bg-secondary/20 rounded border border-border/50">
-                    <div>
-                      <p className="text-xs font-tactical text-foreground">{p.code_name}</p>
-                      <p className="text-[10px] text-muted-foreground">{prog?.name}</p>
+            {projects.length === 0 ? (
+              <EmptyState icon={FileSearch} title="NO PROJECTS" message="No classified projects to display." />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {projects.map(p => {
+                  const prog = programs.find(pr => pr.id === p.program_id);
+                  return (
+                    <div key={p.id} className="flex items-center justify-between p-3 bg-secondary/20 rounded border border-border/50">
+                      <div>
+                        <p className="text-xs font-tactical text-foreground">{p.code_name}</p>
+                        <p className="text-[10px] text-muted-foreground">{prog?.name}</p>
+                      </div>
+                      <StatusBadge status={p.status} />
                     </div>
-                    <StatusBadge status={p.status} />
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

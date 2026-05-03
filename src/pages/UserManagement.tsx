@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
+import EmptyState from '@/components/EmptyState';
 import { Users, Plus, RotateCcw, Power, Trash2 } from 'lucide-react';
 
 export default function UserManagement() {
@@ -163,7 +164,9 @@ export default function UserManagement() {
                   </tr>
                 ))}
                 {users.length === 0 && (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">No users registered</td></tr>
+                  <tr><td colSpan={4} className="p-0">
+                    <EmptyState icon={Users} title="NO USERS" message="No personnel registered yet. Use Add User to create the first account." />
+                  </td></tr>
                 )}
               </tbody>
             </table>
