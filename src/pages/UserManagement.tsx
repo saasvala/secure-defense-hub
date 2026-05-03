@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
+import EmptyState from '@/components/EmptyState';
 import { Users, Plus, RotateCcw, Power, Trash2 } from 'lucide-react';
 
 export default function UserManagement() {
