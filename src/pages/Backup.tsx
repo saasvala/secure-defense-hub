@@ -11,27 +11,35 @@ export default function Backup() {
   const [showRecovery, setShowRecovery] = useState(false);
 
   const createBackup = () => {
-    const allData: Record<string, any> = {};
-    Object.keys(localStorage).forEach(k => {
-      if (k.startsWith('dro_')) allData[k] = localStorage.getItem(k);
-    });
-    const blob = new Blob([JSON.stringify(allData)], { type: 'application/json' });
-    const size = (blob.size / 1024).toFixed(1) + ' KB';
+    try {
+      const allData: Record<string, any> = {};
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('dro_')) allData[k] = localStorage.getItem(k);
+      });
+      if (Object.keys(allData).length === 0) {
+        toast.error('No system data available to back up');
+        return;
+      }
+      const blob = new Blob([JSON.stringify(allData)], { type: 'application/json' });
+      const size = (blob.size / 1024).toFixed(1) + ' KB';
 
-    const entry = { id: genId(), date: new Date().toISOString(), size, status: 'completed' as const };
-    const updated = [entry, ...backups];
-    store.setBackups(updated);
-    setBackups(updated);
+      const entry = { id: genId(), date: new Date().toISOString(), size, status: 'completed' as const };
+      const updated = [entry, ...backups];
+      store.setBackups(updated);
+      setBackups(updated);
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dro_backup_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dro_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
 
-    store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'BACKUP_CREATED', details: `Size: ${size}` });
-    toast.success(`Backup created (${size})`);
+      store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'BACKUP_CREATED', details: `Size: ${size}` });
+      toast.success(`Backup created (${size})`);
+    } catch (err) {
+      toast.error('Backup failed — system data unreachable');
+    }
   };
 
   const restoreBackup = () => {
