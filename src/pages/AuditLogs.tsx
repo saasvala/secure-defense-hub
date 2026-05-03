@@ -49,6 +49,9 @@ export default function AuditLogs() {
     URL.revokeObjectURL(url);
     store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'FORENSIC_EXPORT', details: `Exported ${filtered.length} entries` });
     toast.success(`Forensic bundle exported (${filtered.length} entries)`);
+    } catch {
+      toast.error('Forensic export failed');
+    }
   };
 
   return (
