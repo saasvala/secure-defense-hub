@@ -69,7 +69,7 @@ export default function Dashboard() {
                 </div>
               ))}
               {activePrograms.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">No active programs</p>
+                <EmptyState icon={FolderKanban} title="NO ACTIVE PROGRAMS" message="No programs currently in active status." />
               )}
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function Dashboard() {
                 </div>
               ))}
               {recentAudit.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">No activity logged</p>
+                <EmptyState icon={Activity} title="NO ACTIVITY" message="No recent system activity logged." />
               )}
             </div>
           </div>
