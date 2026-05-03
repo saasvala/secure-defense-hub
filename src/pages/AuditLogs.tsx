@@ -3,6 +3,7 @@ import { store } from '@/lib/store';
 import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { ClipboardList, Download, User, Shield, Filter } from 'lucide-react';
 
 export default function AuditLogs() {
