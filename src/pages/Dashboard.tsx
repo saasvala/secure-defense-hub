@@ -3,6 +3,7 @@ import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import StatusBoard from '@/components/StatusBoard';
 import MissionTimeline from '@/components/MissionTimeline';
+import EmptyState from '@/components/EmptyState';
 import PriorityAlerts from '@/components/PriorityAlerts';
 import { LayoutDashboard, FolderKanban, FileSearch, Users, Shield, FlaskConical, Package, Activity } from 'lucide-react';
 
