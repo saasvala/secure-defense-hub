@@ -3,6 +3,7 @@ import { store, genId } from '@/lib/store';
 import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import ImmutableBadge from '@/components/ImmutableBadge';
+import EmptyState from '@/components/EmptyState';
 import { HardDrive, Download, Upload, ShieldCheck, AlertTriangle, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export default function Backup() {
