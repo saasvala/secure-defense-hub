@@ -106,6 +106,29 @@ export function seedData() {
   }
 
   // Seed dummy users (non-admin)
+  const ROLE_BY_USERNAME: Record<string, string> = {
+    director_hawk: 'Defense Director',
+    cmd_falcon: 'Program Commander',
+    sci_nova: 'Lead Scientist',
+    eng_strike: 'Weapons Systems Engineer',
+    cyber_shield: 'Cyber Security Analyst',
+    fto_range: 'Field Testing Officer',
+    audit_ext: 'External Auditor',
+  };
+  const superAdminId = getRoleId('Super Admin');
+  const allUsers = store.getUsers();
+  // Repair previously mis-seeded users (everyone showing Super Admin)
+  let needsRepair = false;
+  const repaired = allUsers.map(u => {
+    const expected = ROLE_BY_USERNAME[u.username];
+    if (expected && u.role_id === superAdminId) {
+      needsRepair = true;
+      return { ...u, role_id: getRoleId(expected) };
+    }
+    return u;
+  });
+  if (needsRepair) store.setUsers(repaired);
+
   if (store.getUsers().length <= 1) {
     const existingUsers = store.getUsers();
     const dummyUsers = [
