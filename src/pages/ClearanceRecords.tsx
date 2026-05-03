@@ -8,6 +8,7 @@ import ClearanceMatrix from '@/components/ClearanceMatrix';
 import ImmutableBadge from '@/components/ImmutableBadge';
 import CrudModal, { type FieldDef } from '@/components/CrudModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import EmptyState from '@/components/EmptyState';
 import { toast } from 'sonner';
 import { KeyRound, Shield, Plus, Pencil, Trash2 } from 'lucide-react';
 
