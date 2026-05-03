@@ -211,7 +211,9 @@ export default function Backup() {
                   </tr>
                 ))}
                 {backups.length === 0 && (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">No backups created yet</td></tr>
+                  <tr><td colSpan={4} className="p-0">
+                    <EmptyState icon={HardDrive} title="NO BACKUPS" message="No system backups recorded yet. Use Create Backup to generate one." />
+                  </td></tr>
                 )}
               </tbody>
             </table>
