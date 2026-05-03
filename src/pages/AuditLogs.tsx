@@ -132,7 +132,9 @@ export default function AuditLogs() {
               );
             })}
             {filtered.length === 0 && (
-              <div className="px-4 py-8 text-center text-xs text-muted-foreground">No audit entries</div>
+              <div className="p-2">
+                <EmptyState icon={ClipboardList} title="NO AUDIT ENTRIES" message={filterAction ? `No entries match action "${filterAction}".` : 'No system activity has been recorded yet.'} />
+              </div>
             )}
           </div>
         </div>
