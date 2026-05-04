@@ -82,9 +82,9 @@ export default function Dashboard() {
             </div>
             <div className="p-4 space-y-1">
               {recentAudit.map(a => (
-                <div key={a.id} className="flex items-center justify-between py-1.5 text-[11px]">
-                  <span className="font-tactical text-foreground/70">{a.action}</span>
-                  <span className="text-muted-foreground font-body">{new Date(a.date).toLocaleString()}</span>
+                <div key={a.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 py-1.5 text-[11px]">
+                  <span className="font-tactical text-foreground/70 break-all min-w-0">{a.action}</span>
+                  <span className="text-muted-foreground font-body tabular-nums whitespace-nowrap">{new Date(a.date).toLocaleString()}</span>
                 </div>
               ))}
               {recentAudit.length === 0 && (
