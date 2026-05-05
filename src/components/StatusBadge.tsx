@@ -25,11 +25,26 @@ const STATUS_STYLES: Record<string, string> = {
   UNCLASSIFIED: 'bg-tactical-green/10 text-tactical-green border-tactical-green/30',
 };
 
-export default function StatusBadge({ status }: { status: string }) {
-  const style = STATUS_STYLES[status] || 'bg-muted text-muted-foreground border-border';
-  return (
-    <span className={`inline-flex px-2 py-0.5 text-[10px] font-tactical rounded border ${style}`}>
-      {status.replace(/_/g, ' ')}
-    </span>
-  );
+import { forwardRef } from 'react';
+
+interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  status: string;
 }
+
+const StatusBadge = forwardRef<HTMLSpanElement, StatusBadgeProps>(
+  ({ status, className = '', ...rest }, ref) => {
+    const style = STATUS_STYLES[status] || 'bg-muted text-muted-foreground border-border';
+    return (
+      <span
+        ref={ref}
+        className={`inline-flex px-2 py-0.5 text-[10px] font-tactical rounded border ${style} ${className}`}
+        {...rest}
+      >
+        {status.replace(/_/g, ' ')}
+      </span>
+    );
+  }
+);
+StatusBadge.displayName = 'StatusBadge';
+
+export default StatusBadge;
