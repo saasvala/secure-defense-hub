@@ -1,21 +1,6 @@
-import { createContext, useState, useCallback, type ReactNode } from 'react';
+import { useState, useCallback, type ReactNode } from 'react';
 import { store, type User, type Role } from '@/lib/store';
-
-type AppState = 'license' | 'setup' | 'login' | 'app';
-
-export interface AuthContextType {
-  appState: AppState;
-  currentUser: User | null;
-  currentRole: Role | null;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
-  activateLicense: (key: string) => boolean;
-  completeSetup: (username: string, password: string) => void;
-  isLicensed: boolean;
-  isSuperAdmin: boolean;
-}
-
-export const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext, type AppState } from './auth-context';
 
 // Valid license keys (hardcoded for offline)
 const VALID_KEYS = [
