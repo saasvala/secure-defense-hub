@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { store, genId, type FieldTest } from '@/lib/store';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/useAuth';
 import { can } from '@/lib/permissions';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';

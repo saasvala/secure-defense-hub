@@ -10,7 +10,9 @@ export interface FieldDef {
   placeholder?: string;
 }
 
-interface Props<T extends Record<string, any>> {
+type FieldValue = string | number;
+
+interface Props<T extends object> {
   open: boolean;
   title: string;
   fields: FieldDef[];
@@ -21,16 +23,23 @@ interface Props<T extends Record<string, any>> {
   children?: ReactNode;
 }
 
-export default function CrudModal<T extends Record<string, any>>({
+export default function CrudModal<T extends object>({
   open, title, fields, initial, onClose, onSubmit, submitLabel = 'SAVE',
 }: Props<T>) {
-  const [values, setValues] = useState<Record<string, any>>({});
+  const [values, setValues] = useState<Record<string, FieldValue>>({});
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (open) {
-      const init: Record<string, any> = {};
-      fields.forEach(f => { init[f.key] = (initial as any)?.[f.key] ?? (f.type === 'number' ? 0 : ''); });
+      const init: Record<string, FieldValue> = {};
+      fields.forEach(f => {
+        const v = (initial as Record<string, unknown> | undefined)?.[f.key];
+        if (typeof v === 'string' || typeof v === 'number') {
+          init[f.key] = v;
+        } else {
+          init[f.key] = f.type === 'number' ? 0 : '';
+        }
+      });
       setValues(init);
       setError('');
     }
