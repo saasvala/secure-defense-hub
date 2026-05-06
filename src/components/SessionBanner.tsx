@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ShieldCheck, ShieldAlert, Lock, WifiOff, Activity } from 'lucide-react';
 import { store } from '@/lib/store';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/useAuth';
 
 export default function SessionBanner() {
   const { currentUser, currentRole } = useAuth();

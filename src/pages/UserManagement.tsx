@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { store, genId, type User } from '@/lib/store';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/useAuth';
 import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import PageHeader from '@/components/PageHeader';

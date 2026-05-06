@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/useAuth';
 import { Shield, UserCog } from 'lucide-react';
 
 export default function SetupScreen() {
