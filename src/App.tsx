@@ -22,6 +22,7 @@ import Reports from "@/pages/Reports";
 import AuditLogs from "@/pages/AuditLogs";
 import Backup from "@/pages/Backup";
 import UserManagement from "@/pages/UserManagement";
+import AllRolesDashboard from "@/pages/AllRolesDashboard";
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import RouteGuard from "@/components/RouteGuard";
@@ -54,6 +55,7 @@ function AppRoutes() {
         <Route path="/audit" element={<RouteGuard module="audit"><AuditLogs /></RouteGuard>} />
         <Route path="/backup" element={<RouteGuard module="backup"><Backup /></RouteGuard>} />
         <Route path="/users" element={<RouteGuard module="users"><UserManagement /></RouteGuard>} />
+        <Route path="/admin/all-roles" element={<RouteGuard module="users"><AllRolesDashboard /></RouteGuard>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
