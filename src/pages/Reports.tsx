@@ -9,7 +9,7 @@ export default function Reports() {
   const prototypes = store.getPrototypes();
   const tests = store.getFieldTests();
 
-  const exportCSV = (data: Record<string, unknown>[], filename: string) => {
+  const exportCSV = (data: readonly object[], filename: string) => {
     if (data.length === 0) { toast.error('No records to export'); return; }
     try {
       const headers = Object.keys(data[0]).join(',');

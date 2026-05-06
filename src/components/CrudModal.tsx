@@ -10,7 +10,7 @@ export interface FieldDef {
   placeholder?: string;
 }
 
-type FieldValue = string | number | boolean | null | undefined;
+type FieldValue = string | number;
 
 interface Props<T extends Record<string, unknown>> {
   open: boolean;
@@ -33,8 +33,12 @@ export default function CrudModal<T extends Record<string, unknown>>({
     if (open) {
       const init: Record<string, FieldValue> = {};
       fields.forEach(f => {
-        const v = (initial as Record<string, FieldValue> | undefined)?.[f.key];
-        init[f.key] = v ?? (f.type === 'number' ? 0 : '');
+        const v = (initial as Record<string, unknown> | undefined)?.[f.key];
+        if (typeof v === 'string' || typeof v === 'number') {
+          init[f.key] = v;
+        } else {
+          init[f.key] = f.type === 'number' ? 0 : '';
+        }
       });
       setValues(init);
       setError('');
