@@ -9,7 +9,7 @@ export default function Reports() {
   const prototypes = store.getPrototypes();
   const tests = store.getFieldTests();
 
-  const exportCSV = (data: any[], filename: string) => {
+  const exportCSV = (data: Record<string, unknown>[], filename: string) => {
     if (data.length === 0) { toast.error('No records to export'); return; }
     try {
       const headers = Object.keys(data[0]).join(',');
@@ -21,7 +21,7 @@ export default function Reports() {
       URL.revokeObjectURL(url);
       store.addAudit({ user_id: store.getCurrentUser()?.id || 'unknown', action: 'EXPORT', details: `Exported ${filename}` });
       toast.success(`${filename}.csv exported (${data.length} records)`);
-    } catch (e) {
+    } catch {
       toast.error('Export failed');
     }
   };

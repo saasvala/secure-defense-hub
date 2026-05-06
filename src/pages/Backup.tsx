@@ -13,7 +13,7 @@ export default function Backup() {
 
   const createBackup = () => {
     try {
-      const allData: Record<string, any> = {};
+      const allData: Record<string, string | null> = {};
       Object.keys(localStorage).forEach(k => {
         if (k.startsWith('dro_')) allData[k] = localStorage.getItem(k);
       });
@@ -38,7 +38,7 @@ export default function Backup() {
 
       store.addAudit({ user_id: store.getCurrentUser()?.id || 'system', action: 'BACKUP_CREATED', details: `Size: ${size}` });
       toast.success(`Backup created (${size})`);
-    } catch (err) {
+    } catch {
       toast.error('Backup failed — system data unreachable');
     }
   };
@@ -47,8 +47,8 @@ export default function Backup() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    input.onchange = (e: any) => {
-      const file = e.target.files?.[0];
+    input.onchange = (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) { toast.error('No file selected'); return; }
       const reader = new FileReader();
       reader.onerror = () => toast.error('Failed to read backup file');

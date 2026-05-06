@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck, ShieldAlert, Lock, Wifi, WifiOff, Activity } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Lock, WifiOff, Activity } from 'lucide-react';
 import { store } from '@/lib/store';
 import { useAuth } from '@/context/AuthContext';
 
