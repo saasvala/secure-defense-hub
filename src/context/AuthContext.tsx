@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useState, useCallback, type ReactNode } from 'react';
 import { store, type User, type Role } from '@/lib/store';
 
 type AppState = 'license' | 'setup' | 'login' | 'app';
 
-interface AuthContextType {
+export interface AuthContextType {
   appState: AppState;
   currentUser: User | null;
   currentRole: Role | null;
@@ -15,7 +15,7 @@ interface AuthContextType {
   isSuperAdmin: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 // Valid license keys (hardcoded for offline)
 const VALID_KEYS = [
@@ -120,9 +120,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be inside AuthProvider');
-  return ctx;
-};
+export { useAuth } from './useAuth';
