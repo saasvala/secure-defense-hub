@@ -12,7 +12,7 @@ export interface FieldDef {
 
 type FieldValue = string | number;
 
-interface Props<T extends Record<string, unknown>> {
+interface Props<T extends object> {
   open: boolean;
   title: string;
   fields: FieldDef[];
@@ -23,7 +23,7 @@ interface Props<T extends Record<string, unknown>> {
   children?: ReactNode;
 }
 
-export default function CrudModal<T extends Record<string, unknown>>({
+export default function CrudModal<T extends object>({
   open, title, fields, initial, onClose, onSubmit, submitLabel = 'SAVE',
 }: Props<T>) {
   const [values, setValues] = useState<Record<string, FieldValue>>({});
