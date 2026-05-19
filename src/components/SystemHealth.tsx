@@ -123,6 +123,13 @@ export default function SystemHealth() {
           <span className="text-xs font-tactical text-tactical-green tracking-widest">// System Health &amp; Encryption</span>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={simulateBreach}
+            className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-tactical text-tactical-red border border-tactical-red/40 rounded hover:bg-tactical-red/10 transition-colors"
+            title="Simulate a random security degradation"
+          >
+            <Zap className="w-2.5 h-2.5" /> SIM BREACH
+          </button>
           <span className={`px-2 py-0.5 text-[10px] font-tactical rounded border ${TONE_CLS[readyTone].border} ${TONE_CLS[readyTone].bg} ${TONE_CLS[readyTone].text} tracking-widest`}>
             READINESS {readyScore}%
           </span>
@@ -229,16 +236,24 @@ export default function SystemHealth() {
               const t = TONE_CLS[tone];
               const Icon = r.ok ? CheckCircle2 : AlertTriangle;
               return (
-                <div key={r.label} className={`flex items-center justify-between px-2 py-1.5 rounded border ${t.border} ${t.bg}`}>
+                <button
+                  key={r.label}
+                  onClick={() => toggleForce(r.label)}
+                  title={r.ok ? 'Click to force degraded state' : 'Click to restore'}
+                  className={`w-full flex items-center justify-between px-2 py-1.5 rounded border ${t.border} ${t.bg} hover:brightness-125 transition-all text-left`}
+                >
                   <span className="flex items-center gap-1.5 text-[10px] font-tactical text-foreground/85 tracking-wider">
-                    <span className={`w-1.5 h-1.5 rounded-full ${t.dot} pulse-dot`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${t.dot} ${!r.ok ? 'pulse-dot' : ''}`} />
                     {r.label}
                   </span>
                   <Icon className={`w-3.5 h-3.5 ${t.text}`} />
-                </div>
+                </button>
               );
             })}
           </div>
+          <p className="text-[9px] font-tactical text-muted-foreground/70 mt-2 tracking-wider">
+            ▸ Click any check to toggle state and trigger alert
+          </p>
         </div>
       </div>
     </div>
