@@ -3,6 +3,7 @@ import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import StatusBoard from '@/components/StatusBoard';
 import SystemMonitoring from '@/components/SystemMonitoring';
+import AnomalyTimeline from '@/components/AnomalyTimeline';
 import MissionTimeline from '@/components/MissionTimeline';
 import EmptyState from '@/components/EmptyState';
 import PriorityAlerts from '@/components/PriorityAlerts';
@@ -53,6 +54,9 @@ export default function Dashboard() {
 
         {/* Real-Time System Monitoring */}
         <SystemMonitoring />
+
+        {/* Anomaly Timeline Feed */}
+        <AnomalyTimeline />
 
         {/* Status Board */}
         <StatusBoard />
