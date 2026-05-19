@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { can, type ModuleKey } from '@/lib/permissions';
+import { store } from '@/lib/store';
 import {
   Shield, LayoutDashboard, FolderKanban, FileSearch, Cpu,
   FlaskConical, KeyRound, ShieldCheck, Package, FileBarChart,
   ClipboardList, HardDrive, Users, LogOut, ChevronRight, ChevronDown,
-  Settings, LayoutGrid,
+  Settings, LayoutGrid, UserCog, Check,
 } from 'lucide-react';
 
 const ALL_ITEMS: { path: string; label: string; icon: typeof Shield; module: ModuleKey }[] = [
@@ -33,18 +34,41 @@ interface Props {
 }
 
 export default function AppSidebar({ onNavigate }: Props) {
-  const { currentUser, currentRole, logout, isSuperAdmin } = useAuth();
+  const { currentUser, currentRole, realRole, logout, isSuperAdmin, impersonatedRoleName, switchRole } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const items = ALL_ITEMS.filter(i => can(currentRole?.name, i.module, 'view'));
   const adminActive = ADMIN_ITEMS.some(a => location.pathname === a.path);
   const [adminOpen, setAdminOpen] = useState(adminActive);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const switcherRef = useRef<HTMLDivElement | null>(null);
+
+  const allRoles = useMemo(() => store.getRoles(), []);
+
+  useEffect(() => {
+    if (!switcherOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+        setSwitcherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [switcherOpen]);
 
   const handleNav = (path: string) => {
     navigate(path);
     onNavigate?.();
   };
+
+  const handleSwitch = (roleName: string | null) => {
+    switchRole(roleName);
+    setSwitcherOpen(false);
+    navigate('/dashboard');
+    onNavigate?.();
+  };
+
 
   return (
     <aside className="w-60 h-screen bg-sidebar border-r border-sidebar-border flex flex-col sticky top-0">
@@ -127,10 +151,89 @@ export default function AppSidebar({ onNavigate }: Props) {
 
       {/* User Info + Logout */}
       <div className="p-4 border-t border-sidebar-border">
-        <div className="mb-3">
-          <p className="text-xs font-tactical text-sidebar-foreground truncate">{currentUser?.username}</p>
-          <p className="text-[9px] font-tactical text-sidebar-foreground/50 truncate">{currentRole?.name}</p>
+        <div className="mb-3 flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-tactical text-sidebar-foreground truncate">{currentUser?.username}</p>
+            <p className="text-[9px] font-tactical text-sidebar-foreground/50 truncate">
+              {currentRole?.name}
+              {impersonatedRoleName && (
+                <span className="ml-1 text-tactical-amber">(view)</span>
+              )}
+            </p>
+          </div>
+
+          {/* Role switcher — Super Admin only */}
+          {isSuperAdmin && (
+            <div className="relative" ref={switcherRef}>
+              <button
+                onClick={() => setSwitcherOpen(o => !o)}
+                aria-label="Switch role view"
+                aria-expanded={switcherOpen}
+                title="Switch role dashboard"
+                className={`p-1.5 rounded border text-[10px] font-tactical transition-colors ${
+                  impersonatedRoleName
+                    ? 'border-tactical-amber/50 text-tactical-amber bg-tactical-amber/10'
+                    : 'border-sidebar-border text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                }`}
+              >
+                <UserCog className="w-3.5 h-3.5" />
+              </button>
+
+              {switcherOpen && (
+                <div className="absolute right-0 bottom-full mb-2 w-56 max-h-72 overflow-y-auto bg-sidebar border border-sidebar-border rounded shadow-lg z-50">
+                  <div className="px-3 py-2 border-b border-sidebar-border">
+                    <p className="text-[9px] font-tactical text-sidebar-foreground/60 uppercase tracking-wider">
+                      Switch Dashboard View
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleSwitch(null)}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
+                      !impersonatedRoleName
+                        ? 'bg-sidebar-accent text-sidebar-primary'
+                        : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
+                    }`}
+                  >
+                    <Shield className="w-3 h-3 shrink-0" />
+                    <span className="flex-1 truncate">Super Admin (Default)</span>
+                    {!impersonatedRoleName && <Check className="w-3 h-3" />}
+                  </button>
+                  {allRoles
+                    .filter(r => r.name !== 'Super Admin')
+                    .map(r => {
+                      const active = impersonatedRoleName === r.name;
+                      return (
+                        <button
+                          key={r.id}
+                          onClick={() => handleSwitch(r.name)}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
+                            active
+                              ? 'bg-sidebar-accent text-sidebar-primary'
+                              : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
+                          }`}
+                        >
+                          <LayoutDashboard className="w-3 h-3 shrink-0" />
+                          <span className="flex-1 truncate">{r.name}</span>
+                          {active && <Check className="w-3 h-3" />}
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Quick restore banner when impersonating */}
+        {isSuperAdmin && impersonatedRoleName && (
+          <button
+            onClick={() => handleSwitch(null)}
+            className="w-full mb-2 px-2 py-1.5 rounded border border-tactical-amber/40 bg-tactical-amber/10 text-tactical-amber text-[10px] font-tactical hover:bg-tactical-amber/20 transition-colors"
+          >
+            ↺ Restore Super Admin View
+          </button>
+        )}
+
         <button
           onClick={logout}
           className="w-full flex items-center gap-2 px-3 py-2 text-xs font-tactical text-destructive/80 hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
@@ -139,7 +242,7 @@ export default function AppSidebar({ onNavigate }: Props) {
           <span>Logout</span>
         </button>
         <p className="text-[8px] text-sidebar-foreground/30 font-tactical mt-3 text-center">
-          Powered by Software Vala™
+          Powered by Software Vala™ {realRole && realRole.name !== currentRole?.name ? '• Role View Active' : ''}
         </p>
       </div>
     </aside>

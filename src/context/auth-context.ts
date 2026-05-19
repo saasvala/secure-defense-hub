@@ -7,6 +7,9 @@ export interface AuthContextType {
   appState: AppState;
   currentUser: User | null;
   currentRole: Role | null;
+  realRole: Role | null;
+  impersonatedRoleName: string | null;
+  switchRole: (roleName: string | null) => void;
   login: (username: string, password: string) => boolean;
   logout: () => void;
   activateLicense: (key: string) => boolean;
