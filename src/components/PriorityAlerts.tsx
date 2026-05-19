@@ -66,24 +66,26 @@ export default function PriorityAlerts() {
   const alerts = generateAlerts();
 
   return (
-    <div className="bg-card border border-border rounded">
-      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+    <div className="glass holo-border rounded">
+      <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-tactical-amber" />
-          <span className="text-xs font-tactical text-muted-foreground">Priority Alerts</span>
+          <AlertTriangle className="w-4 h-4 text-tactical-amber animate-pulse-amber" />
+          <span className="text-xs font-tactical text-tactical-amber tracking-widest">// Threat Alerts</span>
         </div>
-        <span className="text-[10px] font-tactical text-tactical-amber">{alerts.length} ACTIVE</span>
+        <span className="text-[10px] font-tactical text-tactical-red px-2 py-0.5 rounded border border-tactical-red/40 bg-tactical-red/10 animate-pulse-amber">
+          {alerts.length} ACTIVE
+        </span>
       </div>
       <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto">
         {alerts.map(alert => {
           const config = SEVERITY_CONFIG[alert.severity];
           const Icon = config.icon;
           return (
-            <div key={alert.id} className={`flex items-start gap-2 px-3 py-2 rounded border ${config.bg}`}>
-              <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${config.dot} shrink-0`} />
+            <div key={alert.id} className={`flex items-start gap-2 px-3 py-2 rounded border ${config.bg} hover:bg-opacity-30 transition-colors`}>
+              <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${config.dot} shrink-0 pulse-dot`} />
               <div className="flex-1 min-w-0">
-                <p className={`text-[11px] font-tactical ${config.color}`}>{alert.message}</p>
-                <p className="text-[9px] text-muted-foreground mt-0.5">{alert.module}</p>
+                <p className={`text-[11px] font-tactical ${config.color} tracking-wider`}>{alert.message}</p>
+                <p className="text-[9px] text-muted-foreground mt-0.5">▸ {alert.module}</p>
               </div>
               <Icon className={`w-3 h-3 ${config.color} shrink-0 mt-0.5`} />
             </div>

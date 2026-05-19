@@ -17,12 +17,12 @@ export default function Dashboard() {
   const audit = store.getAudit();
 
   const stats = [
-    { label: 'Programs', value: programs.length, icon: FolderKanban, color: 'text-primary' },
-    { label: 'Projects', value: projects.length, icon: FileSearch, color: 'text-tactical-blue' },
-    { label: 'Personnel', value: users.length, icon: Users, color: 'text-tactical-green' },
-    { label: 'Assets', value: assets.length, icon: Package, color: 'text-tactical-amber' },
-    { label: 'Field Tests', value: fieldTests.length, icon: FlaskConical, color: 'text-accent' },
-    { label: 'Prototypes', value: prototypes.length, icon: Shield, color: 'text-muted-foreground' },
+    { label: 'Programs', value: programs.length, icon: FolderKanban, color: 'text-primary', glow: 'glow-amber' },
+    { label: 'Projects', value: projects.length, icon: FileSearch, color: 'text-tactical-blue', glow: 'glow-blue' },
+    { label: 'Personnel', value: users.length, icon: Users, color: 'text-tactical-green', glow: 'glow-green' },
+    { label: 'Assets', value: assets.length, icon: Package, color: 'text-tactical-amber', glow: 'glow-amber' },
+    { label: 'Field Tests', value: fieldTests.length, icon: FlaskConical, color: 'text-accent', glow: 'glow-blue' },
+    { label: 'Prototypes', value: prototypes.length, icon: Shield, color: 'text-tactical-green', glow: 'glow-green' },
   ];
 
   const activePrograms = programs.filter(p => p.status === 'active');
@@ -36,12 +36,16 @@ export default function Dashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {stats.map(s => (
-            <div key={s.label} className="bg-card border border-border rounded p-4">
-              <div className="flex items-center gap-2 mb-2">
+            <div key={s.label} className={`glass holo-border rounded p-4 relative overflow-hidden transition-transform hover:-translate-y-0.5 ${s.glow}`}>
+              <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full opacity-10 blur-2xl bg-current pointer-events-none" />
+              <div className="flex items-center gap-2 mb-2 relative">
                 <s.icon className={`w-4 h-4 ${s.color}`} />
-                <span className="text-[10px] font-tactical text-muted-foreground">{s.label}</span>
+                <span className="text-[10px] font-tactical text-muted-foreground tracking-widest">{s.label}</span>
               </div>
-              <p className="text-2xl font-tactical text-foreground">{s.value}</p>
+              <p className={`text-3xl font-tactical font-bold relative ${s.color}`}>{String(s.value).padStart(2, '0')}</p>
+              <div className="mt-2 h-1 rounded-sm bg-secondary/40 overflow-hidden relative">
+                <div className="h-full progress-glow" style={{ width: `${Math.min(100, s.value * 8 + 20)}%` }} />
+              </div>
             </div>
           ))}
         </div>
