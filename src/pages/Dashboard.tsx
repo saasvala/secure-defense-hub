@@ -2,6 +2,7 @@ import { store } from '@/lib/store';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import StatusBoard from '@/components/StatusBoard';
+import SystemMonitoring from '@/components/SystemMonitoring';
 import MissionTimeline from '@/components/MissionTimeline';
 import EmptyState from '@/components/EmptyState';
 import PriorityAlerts from '@/components/PriorityAlerts';
@@ -49,6 +50,9 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* Real-Time System Monitoring */}
+        <SystemMonitoring />
 
         {/* Status Board */}
         <StatusBoard />
