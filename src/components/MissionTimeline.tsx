@@ -1,5 +1,19 @@
 import { store } from '@/lib/store';
 
+const TACTICAL_OPS = [
+  { code: 'OPERATION SHADOW',  progress: 82, tag: 'BLACK-OPS',  tone: 'red' as const },
+  { code: 'NIGHTFALL-X',       progress: 47, tag: 'RECON',      tone: 'blue' as const },
+  { code: 'EAGLE CORE',        progress: 64, tag: 'AIR-CMD',    tone: 'amber' as const },
+  { code: 'PHANTOM GRID',      progress: 91, tag: 'CYBER-DEF',  tone: 'green' as const },
+];
+
+const TONE: Record<'red'|'blue'|'amber'|'green', string> = {
+  red: 'text-tactical-red',
+  blue: 'text-tactical-blue',
+  amber: 'text-tactical-amber',
+  green: 'text-tactical-green',
+};
+
 export default function MissionTimeline() {
   const projects = store.getProjects();
   const programs = store.getPrograms();
@@ -23,7 +37,24 @@ export default function MissionTimeline() {
       <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
         <span className="text-xs font-tactical text-tactical-blue tracking-widest">// Mission Timeline</span>
         <span className="text-[9px] font-tactical text-muted-foreground">{projects.length} OPS</span>
-      </div>
+        </div>
+
+        {/* Tactical named operations */}
+        <div className="space-y-2.5 pb-3 mb-1 border-b border-border/40">
+          {TACTICAL_OPS.map(op => (
+            <div key={op.code}>
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-[10px] font-tactical tracking-widest ${TONE[op.tone]}`}>◆ {op.code}</span>
+                <span className="text-[9px] font-tactical text-muted-foreground">{op.tag} • {op.progress}%</span>
+              </div>
+              <div className="h-2 bg-secondary/60 rounded-sm overflow-hidden border border-border/40 relative">
+                <div className="h-full rounded-sm progress-glow transition-all" style={{ width: `${op.progress}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+
       <div className="p-4 space-y-3.5">
         <div className="flex items-center gap-1 mb-2">
           {stages.map((s, i) => (
