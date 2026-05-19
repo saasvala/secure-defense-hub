@@ -67,6 +67,9 @@ export default function Dashboard() {
         {/* Real-Time System Monitoring */}
         <SystemMonitoring />
 
+        {/* System Health & Encryption Status */}
+        <SystemHealth />
+
         {/* Anomaly Timeline Feed */}
         <AnomalyTimeline />
 
