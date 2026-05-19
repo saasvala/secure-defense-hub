@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { can, type ModuleKey } from '@/lib/permissions';
+import { store } from '@/lib/store';
 import {
   Shield, LayoutDashboard, FolderKanban, FileSearch, Cpu,
   FlaskConical, KeyRound, ShieldCheck, Package, FileBarChart,
   ClipboardList, HardDrive, Users, LogOut, ChevronRight, ChevronDown,
-  Settings, LayoutGrid,
+  Settings, LayoutGrid, UserCog, Check,
 } from 'lucide-react';
 
 const ALL_ITEMS: { path: string; label: string; icon: typeof Shield; module: ModuleKey }[] = [
