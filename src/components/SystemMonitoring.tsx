@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Cpu, HardDrive, Network, Shield, Radio, Database, Activity, Zap } from 'lucide-react';
 import { store } from '@/lib/store';
+import { anomalyFeed } from '@/lib/anomalyFeed';
 
 interface Metric {
   key: string;
@@ -84,7 +85,26 @@ export default function SystemMonitoring() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      setMetrics(buildMetrics(seed));
+      setMetrics(prev => {
+        const next = buildMetrics(seed);
+        // Detect status transitions and log to anomaly feed
+        const prevMap = new Map(prev.map(p => [p.key, p]));
+        next.forEach(n => {
+          const p = prevMap.get(n.key);
+          if (p && p.status !== n.status) {
+            anomalyFeed.push({
+              metricKey: n.key,
+              metricLabel: n.label,
+              from: p.status,
+              to: n.status,
+              value: n.value,
+              unit: n.unit,
+              detail: n.detail,
+            });
+          }
+        });
+        return next;
+      });
       setTick(t => t + 1);
     }, 2500);
     return () => clearInterval(id);
