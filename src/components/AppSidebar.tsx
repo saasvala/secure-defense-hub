@@ -3,6 +3,7 @@ import { useAuth } from '@/context/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { can, type ModuleKey } from '@/lib/permissions';
 import { store } from '@/lib/store';
+import { getRoleDashboardRoute, isRouteRegistered } from '@/lib/routeRegistry';
 import {
   Shield, LayoutDashboard, FolderKanban, FileSearch, Cpu,
   FlaskConical, KeyRound, ShieldCheck, Package, FileBarChart,
