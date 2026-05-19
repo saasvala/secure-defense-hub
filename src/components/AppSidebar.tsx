@@ -215,36 +215,43 @@ export default function AppSidebar({ onNavigate }: Props) {
                   </div>
                   <button
                     onClick={() => handleSwitch(null)}
+                    disabled={!defaultOk}
+                    title={defaultOk ? defaultTarget : 'Route not registered'}
                     className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
-                      !impersonatedRoleName
-                        ? 'bg-sidebar-accent text-sidebar-primary'
-                        : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
+                      !defaultOk
+                        ? 'text-sidebar-foreground/30 cursor-not-allowed'
+                        : !impersonatedRoleName
+                          ? 'bg-sidebar-accent text-sidebar-primary'
+                          : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
                     }`}
                   >
                     <Shield className="w-3 h-3 shrink-0" />
                     <span className="flex-1 truncate">Super Admin (Default)</span>
-                    {!impersonatedRoleName && <Check className="w-3 h-3" />}
+                    {!impersonatedRoleName && defaultOk && <Check className="w-3 h-3" />}
                   </button>
-                  {allRoles
-                    .filter(r => r.name !== 'Super Admin')
-                    .map(r => {
-                      const active = impersonatedRoleName === r.name;
-                      return (
-                        <button
-                          key={r.id}
-                          onClick={() => handleSwitch(r.name)}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
-                            active
+                  {switchableRoles.map(({ role: r, target, ok }) => {
+                    const active = impersonatedRoleName === r.name;
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => handleSwitch(r.name)}
+                        disabled={!ok}
+                        title={ok ? target : `Route ${target} not registered`}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
+                          !ok
+                            ? 'text-sidebar-foreground/30 cursor-not-allowed'
+                            : active
                               ? 'bg-sidebar-accent text-sidebar-primary'
                               : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
-                          }`}
-                        >
-                          <LayoutDashboard className="w-3 h-3 shrink-0" />
-                          <span className="flex-1 truncate">{r.name}</span>
-                          {active && <Check className="w-3 h-3" />}
-                        </button>
-                      );
-                    })}
+                        }`}
+                      >
+                        <LayoutDashboard className="w-3 h-3 shrink-0" />
+                        <span className="flex-1 truncate">{r.name}</span>
+                        {active && ok && <Check className="w-3 h-3" />}
+                        {!ok && <span className="text-[9px] text-destructive">N/A</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
