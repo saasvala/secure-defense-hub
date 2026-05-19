@@ -1,5 +1,19 @@
 import { store } from '@/lib/store';
 
+const TACTICAL_OPS = [
+  { code: 'OPERATION SHADOW',  progress: 82, tag: 'BLACK-OPS',  tone: 'red' as const },
+  { code: 'NIGHTFALL-X',       progress: 47, tag: 'RECON',      tone: 'blue' as const },
+  { code: 'EAGLE CORE',        progress: 64, tag: 'AIR-CMD',    tone: 'amber' as const },
+  { code: 'PHANTOM GRID',      progress: 91, tag: 'CYBER-DEF',  tone: 'green' as const },
+];
+
+const TONE: Record<'red'|'blue'|'amber'|'green', string> = {
+  red: 'text-tactical-red',
+  blue: 'text-tactical-blue',
+  amber: 'text-tactical-amber',
+  green: 'text-tactical-green',
+};
+
 export default function MissionTimeline() {
   const projects = store.getProjects();
   const programs = store.getPrograms();
