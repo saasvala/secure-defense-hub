@@ -7,6 +7,9 @@ import AnomalyTimeline from '@/components/AnomalyTimeline';
 import MissionTimeline from '@/components/MissionTimeline';
 import EmptyState from '@/components/EmptyState';
 import PriorityAlerts from '@/components/PriorityAlerts';
+import TopCommandBar from '@/components/TopCommandBar';
+import AIAnalytics from '@/components/AIAnalytics';
+import SurveillanceFeed from '@/components/SurveillanceFeed';
 import { LayoutDashboard, FolderKanban, FileSearch, Users, Shield, FlaskConical, Package, Activity } from 'lucide-react';
 
 export default function Dashboard() {
@@ -32,9 +35,17 @@ export default function Dashboard() {
 
   return (
     <div>
-      <PageHeader title="Command Center" subtitle="Real-Time System Overview & Status" icon={LayoutDashboard} />
+      <PageHeader title="Cyber Intelligence Hub" subtitle="AI Command • Surveillance • Threat Ops" icon={LayoutDashboard} />
 
       <div className="p-4 sm:p-6 space-y-6">
+        {/* Top Command Bar */}
+        <TopCommandBar />
+
+        {/* AI Command Analytics */}
+        <AIAnalytics />
+
+        {/* Live Surveillance Grid */}
+        <SurveillanceFeed />
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {stats.map(s => (
