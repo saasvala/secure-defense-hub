@@ -19,12 +19,12 @@ export default function MissionTimeline() {
   };
 
   return (
-    <div className="bg-card border border-border rounded">
-      <div className="px-4 py-3 border-b border-border">
-        <span className="text-xs font-tactical text-muted-foreground">Mission Timeline</span>
+    <div className="glass holo-border rounded">
+      <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+        <span className="text-xs font-tactical text-tactical-blue tracking-widest">// Mission Timeline</span>
+        <span className="text-[9px] font-tactical text-muted-foreground">{projects.length} OPS</span>
       </div>
-      <div className="p-4 space-y-3">
-        {/* Stage headers */}
+      <div className="p-4 space-y-3.5">
         <div className="flex items-center gap-1 mb-2">
           {stages.map((s, i) => (
             <div key={s} className="flex-1 flex items-center gap-1">
@@ -35,7 +35,6 @@ export default function MissionTimeline() {
           ))}
         </div>
 
-        {/* Projects on timeline */}
         {projects.slice(0, 6).map(proj => {
           const prog = programs.find(p => p.id === proj.program_id);
           const stageIdx = stages.indexOf(proj.status);
@@ -44,12 +43,12 @@ export default function MissionTimeline() {
           return (
             <div key={proj.id} className="group">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-tactical text-foreground">{proj.code_name}</span>
-                <span className="text-[9px] text-muted-foreground">{prog?.name?.slice(0, 20)}</span>
+                <span className="text-[10px] font-tactical text-foreground tracking-wider">▸ {proj.code_name}</span>
+                <span className="text-[9px] text-muted-foreground truncate max-w-[140px]">{prog?.name?.slice(0, 20)}</span>
               </div>
-              <div className="h-2 bg-secondary rounded-sm overflow-hidden">
+              <div className="h-2 bg-secondary/60 rounded-sm overflow-hidden border border-border/40">
                 <div
-                  className={`h-full rounded-sm transition-all ${stageColors[proj.status] || 'bg-muted-foreground'}`}
+                  className="h-full rounded-sm transition-all progress-glow"
                   style={{ width: `${progress}%` }}
                 />
               </div>

@@ -66,17 +66,18 @@ export default function StatusBoard() {
   };
 
   return (
-    <div className="bg-card border border-border rounded">
-      <div className="px-4 py-3 border-b border-border">
-        <span className="text-xs font-tactical text-muted-foreground">System Status Board</span>
+    <div className="glass holo-border rounded scanline">
+      <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+        <span className="text-xs font-tactical text-tactical-blue tracking-widest">// System Status Board</span>
+        <span className="text-[9px] font-tactical text-tactical-green animate-pulse-amber">● LIVE</span>
       </div>
       <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
         {systemStatus.map(s => (
-          <div key={s.system} className="flex items-center gap-2 px-3 py-2 bg-secondary/20 rounded border border-border/50">
-            <Circle className={`w-2.5 h-2.5 fill-current ${statusColors[s.status as keyof typeof statusColors]}`} />
+          <div key={s.system} className="flex items-center gap-2 px-3 py-2.5 bg-secondary/30 rounded border border-border/60 hover:border-tactical-blue/40 transition-colors">
+            <Circle className={`w-2.5 h-2.5 fill-current pulse-dot ${statusColors[s.status as keyof typeof statusColors]}`} />
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-tactical text-foreground truncate">{s.system}</p>
-              <p className="text-[9px] text-muted-foreground">{s.active}/{s.total}</p>
+              <p className="text-[9px] text-muted-foreground tabular-nums">{s.active}/{s.total}</p>
             </div>
           </div>
         ))}

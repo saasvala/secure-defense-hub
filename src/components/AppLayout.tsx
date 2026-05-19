@@ -7,7 +7,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background relative">
+      <div className="particles" aria-hidden="true" />
       {/* Desktop sidebar */}
       <div className="hidden md:block">
         <AppSidebar />
