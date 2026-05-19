@@ -3,6 +3,7 @@ import { useAuth } from '@/context/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { can, type ModuleKey } from '@/lib/permissions';
 import { store } from '@/lib/store';
+import { getRoleDashboardRoute, isRouteRegistered } from '@/lib/routeRegistry';
 import {
   Shield, LayoutDashboard, FolderKanban, FileSearch, Cpu,
   FlaskConical, KeyRound, ShieldCheck, Package, FileBarChart,
@@ -46,6 +47,24 @@ export default function AppSidebar({ onNavigate }: Props) {
 
   const allRoles = useMemo(() => store.getRoles(), []);
 
+  // Verify every role-switch target route is registered before enabling the dropdown.
+  const switchableRoles = useMemo(
+    () => allRoles
+      .filter(r => r.name !== 'Super Admin')
+      .map(r => ({ role: r, target: getRoleDashboardRoute(r.name), ok: isRouteRegistered(getRoleDashboardRoute(r.name)) })),
+    [allRoles],
+  );
+  const defaultTarget = getRoleDashboardRoute('Super Admin');
+  const defaultOk = isRouteRegistered(defaultTarget);
+  const switcherEnabled = defaultOk && switchableRoles.some(r => r.ok);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const bad = switchableRoles.filter(r => !r.ok);
+    if (!defaultOk) console.error('[RouteMap] Default dashboard route missing:', defaultTarget);
+    if (bad.length) console.error('[RouteMap] Unregistered role-switch targets:', bad.map(b => `${b.role.name}→${b.target}`));
+  }, [switchableRoles, defaultOk, defaultTarget]);
+
   useEffect(() => {
     if (!switcherOpen) return;
     const onClick = (e: MouseEvent) => {
@@ -63,9 +82,14 @@ export default function AppSidebar({ onNavigate }: Props) {
   };
 
   const handleSwitch = (roleName: string | null) => {
+    const target = getRoleDashboardRoute(roleName);
+    if (!isRouteRegistered(target)) {
+      console.error('[RouteMap] Refusing to switch — route not registered:', target);
+      return;
+    }
     switchRole(roleName);
     setSwitcherOpen(false);
-    navigate('/dashboard');
+    navigate(target);
     onNavigate?.();
   };
 
@@ -166,14 +190,17 @@ export default function AppSidebar({ onNavigate }: Props) {
           {isSuperAdmin && (
             <div className="relative" ref={switcherRef}>
               <button
-                onClick={() => setSwitcherOpen(o => !o)}
+                onClick={() => switcherEnabled && setSwitcherOpen(o => !o)}
+                disabled={!switcherEnabled}
                 aria-label="Switch role view"
                 aria-expanded={switcherOpen}
-                title="Switch role dashboard"
+                title={switcherEnabled ? 'Switch role dashboard' : 'No registered dashboard routes available'}
                 className={`p-1.5 rounded border text-[10px] font-tactical transition-colors ${
-                  impersonatedRoleName
-                    ? 'border-tactical-amber/50 text-tactical-amber bg-tactical-amber/10'
-                    : 'border-sidebar-border text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                  !switcherEnabled
+                    ? 'border-sidebar-border/40 text-sidebar-foreground/30 cursor-not-allowed'
+                    : impersonatedRoleName
+                      ? 'border-tactical-amber/50 text-tactical-amber bg-tactical-amber/10'
+                      : 'border-sidebar-border text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
                 }`}
               >
                 <UserCog className="w-3.5 h-3.5" />
@@ -188,36 +215,43 @@ export default function AppSidebar({ onNavigate }: Props) {
                   </div>
                   <button
                     onClick={() => handleSwitch(null)}
+                    disabled={!defaultOk}
+                    title={defaultOk ? defaultTarget : 'Route not registered'}
                     className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
-                      !impersonatedRoleName
-                        ? 'bg-sidebar-accent text-sidebar-primary'
-                        : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
+                      !defaultOk
+                        ? 'text-sidebar-foreground/30 cursor-not-allowed'
+                        : !impersonatedRoleName
+                          ? 'bg-sidebar-accent text-sidebar-primary'
+                          : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
                     }`}
                   >
                     <Shield className="w-3 h-3 shrink-0" />
                     <span className="flex-1 truncate">Super Admin (Default)</span>
-                    {!impersonatedRoleName && <Check className="w-3 h-3" />}
+                    {!impersonatedRoleName && defaultOk && <Check className="w-3 h-3" />}
                   </button>
-                  {allRoles
-                    .filter(r => r.name !== 'Super Admin')
-                    .map(r => {
-                      const active = impersonatedRoleName === r.name;
-                      return (
-                        <button
-                          key={r.id}
-                          onClick={() => handleSwitch(r.name)}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
-                            active
+                  {switchableRoles.map(({ role: r, target, ok }) => {
+                    const active = impersonatedRoleName === r.name;
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => handleSwitch(r.name)}
+                        disabled={!ok}
+                        title={ok ? target : `Route ${target} not registered`}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-tactical text-left transition-colors ${
+                          !ok
+                            ? 'text-sidebar-foreground/30 cursor-not-allowed'
+                            : active
                               ? 'bg-sidebar-accent text-sidebar-primary'
                               : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60'
-                          }`}
-                        >
-                          <LayoutDashboard className="w-3 h-3 shrink-0" />
-                          <span className="flex-1 truncate">{r.name}</span>
-                          {active && <Check className="w-3 h-3" />}
-                        </button>
-                      );
-                    })}
+                        }`}
+                      >
+                        <LayoutDashboard className="w-3 h-3 shrink-0" />
+                        <span className="flex-1 truncate">{r.name}</span>
+                        {active && ok && <Check className="w-3 h-3" />}
+                        {!ok && <span className="text-[9px] text-destructive">N/A</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
