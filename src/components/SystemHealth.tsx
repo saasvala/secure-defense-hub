@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ShieldCheck, Lock, KeyRound, Fingerprint, Server, Wifi, RefreshCw, Database, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { ShieldCheck, Lock, KeyRound, Fingerprint, Server, Wifi, RefreshCw, Database, CheckCircle2, AlertTriangle, Zap } from 'lucide-react';
 import { store } from '@/lib/store';
+import { securityAlerts, type SecurityLevel } from '@/lib/securityAlerts';
 
 type Tone = 'green' | 'amber' | 'red' | 'blue';
 
@@ -49,17 +51,45 @@ export default function SystemHealth() {
     { label: 'Quantum Resilient', value: 'KYBER-1024',         tone: 'amber' as Tone, icon: Lock },
   ];
 
+  // Forced-degradation overrides (manual + simulator)
+  const [forced, setForced] = useState<Record<string, boolean>>({});
+  const toggleForce = (label: string) => setForced(p => ({ ...p, [label]: !p[label] }));
+
   // Security readiness checks
-  const readiness = [
-    { label: 'Master Key Sealed',     ok: true,  tone: 'green' as Tone },
-    { label: 'Vault Mounted',         ok: true,  tone: 'green' as Tone },
-    { label: 'MFA Enforced',          ok: true,  tone: 'green' as Tone },
-    { label: 'Audit Stream Active',   ok: true,  tone: 'green' as Tone },
-    { label: 'Backup < 24h',          ok: !!lastBackup && now - lastBackup < 86400000, tone: 'amber' as Tone },
-    { label: 'Cert Chain Valid',      ok: true,  tone: 'green' as Tone },
-    { label: 'Tamper Seal Intact',    ok: true,  tone: 'green' as Tone },
-    { label: 'Network Isolation',     ok: true,  tone: 'green' as Tone },
-  ];
+  const readiness = useMemo(() => ([
+    { label: 'Master Key Sealed',     ok: !forced['Master Key Sealed'],     tone: 'red'   as Tone },
+    { label: 'Vault Mounted',         ok: !forced['Vault Mounted'],         tone: 'red'   as Tone },
+    { label: 'MFA Enforced',          ok: !forced['MFA Enforced'],          tone: 'amber' as Tone },
+    { label: 'Audit Stream Active',   ok: !forced['Audit Stream Active'],   tone: 'red'   as Tone },
+    { label: 'Backup < 24h',          ok: !forced['Backup < 24h'] && !!lastBackup && now - lastBackup < 86400000, tone: 'amber' as Tone },
+    { label: 'Cert Chain Valid',      ok: !forced['Cert Chain Valid'],      tone: 'red'   as Tone },
+    { label: 'Tamper Seal Intact',    ok: !forced['Tamper Seal Intact'],    tone: 'red'   as Tone },
+    { label: 'Network Isolation',     ok: !forced['Network Isolation'],     tone: 'amber' as Tone },
+  ]), [forced, lastBackup, now]);
+
+  // Detect OK -> degraded/compromised flips and emit toast + push to feed
+  const prevRef = useRef<Record<string, boolean>>({});
+  useEffect(() => {
+    const prev = prevRef.current;
+    const next: Record<string, boolean> = {};
+    readiness.forEach(r => {
+      next[r.label] = r.ok;
+      const was = prev[r.label];
+      if (was === true && r.ok === false) {
+        const level: SecurityLevel = r.tone === 'red' ? 'COMPROMISED' : 'DEGRADED';
+        const message = level === 'COMPROMISED'
+          ? `${r.label} integrity check FAILED. Immediate response required.`
+          : `${r.label} dropped below operational threshold.`;
+        securityAlerts.push({ check: r.label, level, message });
+        const fn = level === 'COMPROMISED' ? toast.error : toast.warning;
+        fn(`SECURITY ${level}`, { description: `${r.label} — ${message}`, duration: level === 'COMPROMISED' ? 8000 : 5000 });
+      } else if (was === false && r.ok === true) {
+        securityAlerts.push({ check: r.label, level: 'INFO', message: `${r.label} restored to operational.` });
+        toast.success('SECURITY RESTORED', { description: `${r.label} back online.` });
+      }
+    });
+    prevRef.current = next;
+  }, [readiness]);
 
   const readyScore = useMemo(
     () => Math.round((readiness.filter(r => r.ok).length / readiness.length) * 100),
@@ -75,9 +105,15 @@ export default function SystemHealth() {
     { label: 'Active Sessions',icon: Server,   value: store.getUsers().length, unit: '', tone: 'blue' },
   ];
 
-  const rotateKey = () => {
-    setKeyAge(Date.now());
+  const rotateKey = () => setKeyAge(Date.now());
+
+  const simulateBreach = () => {
+    const candidates = readiness.filter(r => r.ok);
+    if (!candidates.length) return;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    toggleForce(pick.label);
   };
+
 
   return (
     <div className="glass holo-border rounded scanline">
@@ -87,6 +123,13 @@ export default function SystemHealth() {
           <span className="text-xs font-tactical text-tactical-green tracking-widest">// System Health &amp; Encryption</span>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={simulateBreach}
+            className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-tactical text-tactical-red border border-tactical-red/40 rounded hover:bg-tactical-red/10 transition-colors"
+            title="Simulate a random security degradation"
+          >
+            <Zap className="w-2.5 h-2.5" /> SIM BREACH
+          </button>
           <span className={`px-2 py-0.5 text-[10px] font-tactical rounded border ${TONE_CLS[readyTone].border} ${TONE_CLS[readyTone].bg} ${TONE_CLS[readyTone].text} tracking-widest`}>
             READINESS {readyScore}%
           </span>
@@ -193,16 +236,24 @@ export default function SystemHealth() {
               const t = TONE_CLS[tone];
               const Icon = r.ok ? CheckCircle2 : AlertTriangle;
               return (
-                <div key={r.label} className={`flex items-center justify-between px-2 py-1.5 rounded border ${t.border} ${t.bg}`}>
+                <button
+                  key={r.label}
+                  onClick={() => toggleForce(r.label)}
+                  title={r.ok ? 'Click to force degraded state' : 'Click to restore'}
+                  className={`w-full flex items-center justify-between px-2 py-1.5 rounded border ${t.border} ${t.bg} hover:brightness-125 transition-all text-left`}
+                >
                   <span className="flex items-center gap-1.5 text-[10px] font-tactical text-foreground/85 tracking-wider">
-                    <span className={`w-1.5 h-1.5 rounded-full ${t.dot} pulse-dot`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${t.dot} ${!r.ok ? 'pulse-dot' : ''}`} />
                     {r.label}
                   </span>
                   <Icon className={`w-3.5 h-3.5 ${t.text}`} />
-                </div>
+                </button>
               );
             })}
           </div>
+          <p className="text-[9px] font-tactical text-muted-foreground/70 mt-2 tracking-wider">
+            ▸ Click any check to toggle state and trigger alert
+          </p>
         </div>
       </div>
     </div>
