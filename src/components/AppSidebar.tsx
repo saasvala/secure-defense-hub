@@ -82,9 +82,14 @@ export default function AppSidebar({ onNavigate }: Props) {
   };
 
   const handleSwitch = (roleName: string | null) => {
+    const target = getRoleDashboardRoute(roleName);
+    if (!isRouteRegistered(target)) {
+      console.error('[RouteMap] Refusing to switch — route not registered:', target);
+      return;
+    }
     switchRole(roleName);
     setSwitcherOpen(false);
-    navigate('/dashboard');
+    navigate(target);
     onNavigate?.();
   };
 
