@@ -10,6 +10,7 @@ import PriorityAlerts from '@/components/PriorityAlerts';
 import TopCommandBar from '@/components/TopCommandBar';
 import AIAnalytics from '@/components/AIAnalytics';
 import SurveillanceFeed from '@/components/SurveillanceFeed';
+import SystemHealth from '@/components/SystemHealth';
 import { LayoutDashboard, FolderKanban, FileSearch, Users, Shield, FlaskConical, Package, Activity } from 'lucide-react';
 
 export default function Dashboard() {
@@ -65,6 +66,9 @@ export default function Dashboard() {
 
         {/* Real-Time System Monitoring */}
         <SystemMonitoring />
+
+        {/* System Health & Encryption Status */}
+        <SystemHealth />
 
         {/* Anomaly Timeline Feed */}
         <AnomalyTimeline />
