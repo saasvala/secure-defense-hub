@@ -190,14 +190,17 @@ export default function AppSidebar({ onNavigate }: Props) {
           {isSuperAdmin && (
             <div className="relative" ref={switcherRef}>
               <button
-                onClick={() => setSwitcherOpen(o => !o)}
+                onClick={() => switcherEnabled && setSwitcherOpen(o => !o)}
+                disabled={!switcherEnabled}
                 aria-label="Switch role view"
                 aria-expanded={switcherOpen}
-                title="Switch role dashboard"
+                title={switcherEnabled ? 'Switch role dashboard' : 'No registered dashboard routes available'}
                 className={`p-1.5 rounded border text-[10px] font-tactical transition-colors ${
-                  impersonatedRoleName
-                    ? 'border-tactical-amber/50 text-tactical-amber bg-tactical-amber/10'
-                    : 'border-sidebar-border text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                  !switcherEnabled
+                    ? 'border-sidebar-border/40 text-sidebar-foreground/30 cursor-not-allowed'
+                    : impersonatedRoleName
+                      ? 'border-tactical-amber/50 text-tactical-amber bg-tactical-amber/10'
+                      : 'border-sidebar-border text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
                 }`}
               >
                 <UserCog className="w-3.5 h-3.5" />
