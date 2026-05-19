@@ -8,7 +8,11 @@ const VALID_KEYS = [
   'DRO-2024-BRAVO-3M2P',
   'DRO-2024-DELTA-8W4R',
   'SOFTWAREVALA-MASTER-KEY',
+  '2345-3456-4567',         // 12-digit license key
+  '5678-2345-3456',         // backup key
 ];
+
+const IMPERSONATE_KEY = 'dro_impersonated_role';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(() => {
@@ -21,31 +25,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => store.getCurrentUser());
+  const [impersonatedRoleName, setImpersonatedRoleName] = useState<string | null>(() => {
+    try { return localStorage.getItem(IMPERSONATE_KEY); } catch { return null; }
+  });
 
   const getRoleForUser = useCallback((user: User | null): Role | null => {
     if (!user) return null;
     return store.getRoles().find(r => r.id === user.role_id) || null;
   }, []);
 
-  const currentRole = getRoleForUser(currentUser);
-  const isSuperAdmin = currentRole?.name === 'Super Admin';
+  const realRole = getRoleForUser(currentUser);
+  const isSuperAdmin = realRole?.name === 'Super Admin';
+
+  // Effective role: if super admin is impersonating, use that role for permission filtering.
+  const impersonatedRole = isSuperAdmin && impersonatedRoleName
+    ? store.getRoles().find(r => r.name === impersonatedRoleName) || null
+    : null;
+  const currentRole = impersonatedRole || realRole;
+
+  const switchRole = useCallback((roleName: string | null) => {
+    if (!roleName || roleName === 'Super Admin') {
+      localStorage.removeItem(IMPERSONATE_KEY);
+      setImpersonatedRoleName(null);
+      if (currentUser) store.addAudit({ user_id: currentUser.id, action: 'ROLE_SWITCH', details: 'Restored Super Admin view' });
+      return;
+    }
+    localStorage.setItem(IMPERSONATE_KEY, roleName);
+    setImpersonatedRoleName(roleName);
+    if (currentUser) store.addAudit({ user_id: currentUser.id, action: 'ROLE_SWITCH', details: `Viewing as ${roleName}` });
+  }, [currentUser]);
 
   const activateLicense = useCallback((key: string): boolean => {
     const trimmed = key.trim().toUpperCase();
-    if (!VALID_KEYS.includes(trimmed)) return false;
-    
+    const match = VALID_KEYS.find(k => k.toUpperCase() === trimmed);
+    if (!match) return false;
+
     const deviceId = navigator.userAgent.slice(0, 50);
     store.setLicense({
       id: crypto.randomUUID(),
-      key: trimmed,
+      key: match,
       device: deviceId,
       expiry: '2026-12-31',
       modules: ['all'],
       seats: 50,
       activated: true,
     });
-    store.addAudit({ user_id: 'system', action: 'LICENSE_ACTIVATED', details: `Key: ${trimmed.slice(0, 8)}...` });
-    setAppState('setup');
+    store.addAudit({ user_id: 'system', action: 'LICENSE_ACTIVATED', details: `Key: ${match.slice(0, 8)}...` });
+    // If a Super Admin already exists (seeded), skip setup and go straight to login.
+    setAppState(store.isSetupComplete() ? 'login' : 'setup');
     return true;
   }, []);
 
@@ -65,7 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status: 'active',
     };
 
-    store.setUsers([superAdmin]);
+    const existing = store.getUsers();
+    store.setUsers([superAdmin, ...existing.filter(u => u.username !== username)]);
     store.setSetupComplete(true);
     store.setCurrentUser(superAdmin);
     store.addAudit({ user_id: superAdmin.id, action: 'SUPER_ADMIN_CREATED', details: `Username: ${username}` });
@@ -88,6 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (currentUser) {
       store.addAudit({ user_id: currentUser.id, action: 'LOGOUT', details: `User logged out` });
     }
+    localStorage.removeItem(IMPERSONATE_KEY);
+    setImpersonatedRoleName(null);
     store.setCurrentUser(null);
     setCurrentUser(null);
     setAppState('login');
@@ -95,7 +125,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      appState, currentUser, currentRole,
+      appState, currentUser, currentRole, realRole,
+      impersonatedRoleName, switchRole,
       login, logout, activateLicense, completeSetup,
       isLicensed: !!store.getLicense()?.activated,
       isSuperAdmin,
