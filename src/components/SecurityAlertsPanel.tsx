@@ -20,7 +20,10 @@ export default function SecurityAlertsPanel() {
   const [list, setList] = useState<SecurityAlert[]>(securityAlerts.all());
   const [, setTick] = useState(0);
 
-  useEffect(() => securityAlerts.subscribe(setList), []);
+  useEffect(() => {
+    const unsub = securityAlerts.subscribe(setList);
+    return () => { unsub(); };
+  }, []);
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 15000);
     return () => clearInterval(id);

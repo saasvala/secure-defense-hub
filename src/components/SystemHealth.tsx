@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ShieldCheck, Lock, KeyRound, Fingerprint, Server, Wifi, RefreshCw, Database, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { ShieldCheck, Lock, KeyRound, Fingerprint, Server, Wifi, RefreshCw, Database, CheckCircle2, AlertTriangle, Zap } from 'lucide-react';
 import { store } from '@/lib/store';
+import { securityAlerts, type SecurityLevel } from '@/lib/securityAlerts';
 
 type Tone = 'green' | 'amber' | 'red' | 'blue';
 
