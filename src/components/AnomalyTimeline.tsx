@@ -27,7 +27,10 @@ export default function AnomalyTimeline() {
   const [now, setNow] = useState(Date.now());
   const [filter, setFilter] = useState<'ALL' | AnomalySeverity>('ALL');
 
-  useEffect(() => anomalyFeed.subscribe(setEvents), []);
+  useEffect(() => {
+    const unsub = anomalyFeed.subscribe(setEvents);
+    return () => { unsub(); };
+  }, []);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
