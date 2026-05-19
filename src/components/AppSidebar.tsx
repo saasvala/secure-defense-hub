@@ -34,18 +34,41 @@ interface Props {
 }
 
 export default function AppSidebar({ onNavigate }: Props) {
-  const { currentUser, currentRole, logout, isSuperAdmin } = useAuth();
+  const { currentUser, currentRole, realRole, logout, isSuperAdmin, impersonatedRoleName, switchRole } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const items = ALL_ITEMS.filter(i => can(currentRole?.name, i.module, 'view'));
   const adminActive = ADMIN_ITEMS.some(a => location.pathname === a.path);
   const [adminOpen, setAdminOpen] = useState(adminActive);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const switcherRef = useRef<HTMLDivElement | null>(null);
+
+  const allRoles = useMemo(() => store.getRoles(), []);
+
+  useEffect(() => {
+    if (!switcherOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+        setSwitcherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [switcherOpen]);
 
   const handleNav = (path: string) => {
     navigate(path);
     onNavigate?.();
   };
+
+  const handleSwitch = (roleName: string | null) => {
+    switchRole(roleName);
+    setSwitcherOpen(false);
+    navigate('/dashboard');
+    onNavigate?.();
+  };
+
 
   return (
     <aside className="w-60 h-screen bg-sidebar border-r border-sidebar-border flex flex-col sticky top-0">
