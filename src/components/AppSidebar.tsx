@@ -47,6 +47,24 @@ export default function AppSidebar({ onNavigate }: Props) {
 
   const allRoles = useMemo(() => store.getRoles(), []);
 
+  // Verify every role-switch target route is registered before enabling the dropdown.
+  const switchableRoles = useMemo(
+    () => allRoles
+      .filter(r => r.name !== 'Super Admin')
+      .map(r => ({ role: r, target: getRoleDashboardRoute(r.name), ok: isRouteRegistered(getRoleDashboardRoute(r.name)) })),
+    [allRoles],
+  );
+  const defaultTarget = getRoleDashboardRoute('Super Admin');
+  const defaultOk = isRouteRegistered(defaultTarget);
+  const switcherEnabled = defaultOk && switchableRoles.some(r => r.ok);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const bad = switchableRoles.filter(r => !r.ok);
+    if (!defaultOk) console.error('[RouteMap] Default dashboard route missing:', defaultTarget);
+    if (bad.length) console.error('[RouteMap] Unregistered role-switch targets:', bad.map(b => `${b.role.name}→${b.target}`));
+  }, [switchableRoles, defaultOk, defaultTarget]);
+
   useEffect(() => {
     if (!switcherOpen) return;
     const onClick = (e: MouseEvent) => {
