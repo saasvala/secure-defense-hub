@@ -51,17 +51,45 @@ export default function SystemHealth() {
     { label: 'Quantum Resilient', value: 'KYBER-1024',         tone: 'amber' as Tone, icon: Lock },
   ];
 
+  // Forced-degradation overrides (manual + simulator)
+  const [forced, setForced] = useState<Record<string, boolean>>({});
+  const toggleForce = (label: string) => setForced(p => ({ ...p, [label]: !p[label] }));
+
   // Security readiness checks
-  const readiness = [
-    { label: 'Master Key Sealed',     ok: true,  tone: 'green' as Tone },
-    { label: 'Vault Mounted',         ok: true,  tone: 'green' as Tone },
-    { label: 'MFA Enforced',          ok: true,  tone: 'green' as Tone },
-    { label: 'Audit Stream Active',   ok: true,  tone: 'green' as Tone },
-    { label: 'Backup < 24h',          ok: !!lastBackup && now - lastBackup < 86400000, tone: 'amber' as Tone },
-    { label: 'Cert Chain Valid',      ok: true,  tone: 'green' as Tone },
-    { label: 'Tamper Seal Intact',    ok: true,  tone: 'green' as Tone },
-    { label: 'Network Isolation',     ok: true,  tone: 'green' as Tone },
-  ];
+  const readiness = useMemo(() => ([
+    { label: 'Master Key Sealed',     ok: !forced['Master Key Sealed'],     tone: 'red'   as Tone },
+    { label: 'Vault Mounted',         ok: !forced['Vault Mounted'],         tone: 'red'   as Tone },
+    { label: 'MFA Enforced',          ok: !forced['MFA Enforced'],          tone: 'amber' as Tone },
+    { label: 'Audit Stream Active',   ok: !forced['Audit Stream Active'],   tone: 'red'   as Tone },
+    { label: 'Backup < 24h',          ok: !forced['Backup < 24h'] && !!lastBackup && now - lastBackup < 86400000, tone: 'amber' as Tone },
+    { label: 'Cert Chain Valid',      ok: !forced['Cert Chain Valid'],      tone: 'red'   as Tone },
+    { label: 'Tamper Seal Intact',    ok: !forced['Tamper Seal Intact'],    tone: 'red'   as Tone },
+    { label: 'Network Isolation',     ok: !forced['Network Isolation'],     tone: 'amber' as Tone },
+  ]), [forced, lastBackup, now]);
+
+  // Detect OK -> degraded/compromised flips and emit toast + push to feed
+  const prevRef = useRef<Record<string, boolean>>({});
+  useEffect(() => {
+    const prev = prevRef.current;
+    const next: Record<string, boolean> = {};
+    readiness.forEach(r => {
+      next[r.label] = r.ok;
+      const was = prev[r.label];
+      if (was === true && r.ok === false) {
+        const level: SecurityLevel = r.tone === 'red' ? 'COMPROMISED' : 'DEGRADED';
+        const message = level === 'COMPROMISED'
+          ? `${r.label} integrity check FAILED. Immediate response required.`
+          : `${r.label} dropped below operational threshold.`;
+        securityAlerts.push({ check: r.label, level, message });
+        const fn = level === 'COMPROMISED' ? toast.error : toast.warning;
+        fn(`SECURITY ${level}`, { description: `${r.label} — ${message}`, duration: level === 'COMPROMISED' ? 8000 : 5000 });
+      } else if (was === false && r.ok === true) {
+        securityAlerts.push({ check: r.label, level: 'INFO', message: `${r.label} restored to operational.` });
+        toast.success('SECURITY RESTORED', { description: `${r.label} back online.` });
+      }
+    });
+    prevRef.current = next;
+  }, [readiness]);
 
   const readyScore = useMemo(
     () => Math.round((readiness.filter(r => r.ok).length / readiness.length) * 100),
@@ -77,9 +105,15 @@ export default function SystemHealth() {
     { label: 'Active Sessions',icon: Server,   value: store.getUsers().length, unit: '', tone: 'blue' },
   ];
 
-  const rotateKey = () => {
-    setKeyAge(Date.now());
+  const rotateKey = () => setKeyAge(Date.now());
+
+  const simulateBreach = () => {
+    const candidates = readiness.filter(r => r.ok);
+    if (!candidates.length) return;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    toggleForce(pick.label);
   };
+
 
   return (
     <div className="glass holo-border rounded scanline">
