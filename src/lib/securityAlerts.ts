@@ -1,5 +1,7 @@
 // Persisted security alert feed — captures readiness flips and other security events.
 // Stored in offline localStorage with lightweight obfuscation (XOR + base64) under dro_ prefix.
+import { store } from '@/lib/store';
+
 export type SecurityLevel = 'INFO' | 'DEGRADED' | 'COMPROMISED';
 
 export interface SecurityAlert {
