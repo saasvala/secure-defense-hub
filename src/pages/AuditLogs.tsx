@@ -1,20 +1,26 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { store } from '@/lib/store';
 import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
 import ImmutableBadge from '@/components/ImmutableBadge';
 import EmptyState from '@/components/EmptyState';
-import { ClipboardList, Download, User, Shield, Filter } from 'lucide-react';
+import { ClipboardList, Download, User, Shield, Filter, Search, X, CalendarDays } from 'lucide-react';
 
 export default function AuditLogs() {
   const audit = store.getAudit();
   const users = store.getUsers();
   const roles = store.getRoles();
   const clearances = store.getClearances();
+
   const [filterAction, setFilterAction] = useState('');
+  const [filterUser, setFilterUser] = useState('');
+  const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [quickFilter, setQuickFilter] = useState<'ALL' | 'ACK' | 'CLEAR'>('ALL');
 
   const uniqueActions = [...new Set(audit.map(a => a.action))];
-  const filtered = filterAction ? audit.filter(a => a.action === filterAction) : audit;
+  const actorIds = [...new Set(audit.map(a => a.user_id))];
 
   const getUserInfo = (userId: string) => {
     const user = users.find(u => u.id === userId);
@@ -23,6 +29,33 @@ export default function AuditLogs() {
     return { user, role, clearance };
   };
 
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const fromTs = dateFrom ? new Date(dateFrom).getTime() : null;
+    const toTs = dateTo ? new Date(dateTo).getTime() + 86_399_999 : null;
+    return audit.filter(a => {
+      if (filterAction && a.action !== filterAction) return false;
+      if (filterUser && a.user_id !== filterUser) return false;
+      if (quickFilter === 'ACK' && !a.action.includes('SECURITY_ALERT_ACK')) return false;
+      if (quickFilter === 'CLEAR' && a.action !== 'SECURITY_ALERTS_CLEARED') return false;
+      const ts = new Date(a.date).getTime();
+      if (fromTs && ts < fromTs) return false;
+      if (toTs && ts > toTs) return false;
+      if (q) {
+        const info = getUserInfo(a.user_id);
+        const hay = `${a.action} ${a.details} ${info.user?.username || ''} ${info.role?.name || ''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audit, filterAction, filterUser, search, dateFrom, dateTo, quickFilter]);
+
+  const resetFilters = () => {
+    setFilterAction(''); setFilterUser(''); setSearch(''); setDateFrom(''); setDateTo(''); setQuickFilter('ALL');
+  };
+  const hasActiveFilters = !!(filterAction || filterUser || search || dateFrom || dateTo || quickFilter !== 'ALL');
+
   const exportForensicBundle = () => {
     if (filtered.length === 0) { toast.error('No audit entries to export'); return; }
     try {
@@ -30,6 +63,7 @@ export default function AuditLogs() {
       export_date: new Date().toISOString(),
       export_type: 'FORENSIC_BUNDLE',
       total_entries: filtered.length,
+      filters: { action: filterAction, user: filterUser, search, dateFrom, dateTo, quickFilter },
       entries: filtered.map(a => {
         const info = getUserInfo(a.user_id);
         return {
@@ -71,19 +105,87 @@ export default function AuditLogs() {
       />
       <div className="p-4 sm:p-6 space-y-4">
         {/* Filter Bar */}
-        <div className="flex items-center gap-3">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <select
-            value={filterAction}
-            onChange={e => setFilterAction(e.target.value)}
-            className="bg-input border border-border rounded px-3 py-1.5 text-xs font-tactical text-foreground focus:outline-none focus:border-primary"
-          >
-            <option value="">All Actions ({audit.length})</option>
-            {uniqueActions.map(a => (
-              <option key={a} value={a}>{a}</option>
+        <div className="bg-card border border-border rounded p-3 space-y-3">
+          {/* Quick chips */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            {([
+              { id: 'ALL', label: 'All' },
+              { id: 'ACK', label: 'Acknowledgements' },
+              { id: 'CLEAR', label: 'Clears' },
+            ] as const).map(c => (
+              <button
+                key={c.id}
+                onClick={() => setQuickFilter(c.id)}
+                className={`px-2 py-1 text-[10px] font-tactical tracking-widest rounded border transition-colors ${
+                  quickFilter === c.id
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {c.label}
+              </button>
             ))}
-          </select>
-          <span className="text-[10px] text-muted-foreground font-tactical">Showing {filtered.length} entries</span>
+            {hasActiveFilters && (
+              <button
+                onClick={resetFilters}
+                className="ml-auto flex items-center gap-1 px-2 py-1 text-[10px] font-tactical tracking-widest rounded border border-border text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3 h-3" /> Reset
+              </button>
+            )}
+          </div>
+
+          {/* Inputs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+            <div className="relative lg:col-span-2">
+              <Search className="w-3 h-3 text-muted-foreground absolute left-2 top-1/2 -translate-y-1/2" />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search action, details, actor…"
+                className="w-full bg-input border border-border rounded pl-7 pr-2 py-1.5 text-xs font-tactical text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+            <select
+              value={filterAction}
+              onChange={e => setFilterAction(e.target.value)}
+              className="bg-input border border-border rounded px-2 py-1.5 text-xs font-tactical text-foreground focus:outline-none focus:border-primary"
+            >
+              <option value="">All actions ({audit.length})</option>
+              {uniqueActions.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+            <select
+              value={filterUser}
+              onChange={e => setFilterUser(e.target.value)}
+              className="bg-input border border-border rounded px-2 py-1.5 text-xs font-tactical text-foreground focus:outline-none focus:border-primary"
+            >
+              <option value="">All users</option>
+              {actorIds.map(id => {
+                const u = users.find(x => x.id === id);
+                return <option key={id} value={id}>{u?.username || id}</option>;
+              })}
+            </select>
+            <div className="flex items-center gap-1">
+              <CalendarDays className="w-3 h-3 text-muted-foreground shrink-0" />
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={e => setDateFrom(e.target.value)}
+                className="w-full bg-input border border-border rounded px-2 py-1.5 text-xs font-tactical text-foreground focus:outline-none focus:border-primary"
+              />
+              <span className="text-muted-foreground text-xs">→</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={e => setDateTo(e.target.value)}
+                className="w-full bg-input border border-border rounded px-2 py-1.5 text-xs font-tactical text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          </div>
+          <div className="text-[10px] text-muted-foreground font-tactical tracking-widest">
+            Showing {filtered.length} of {audit.length} entries
+          </div>
         </div>
 
         {/* Trace Timeline */}
@@ -138,7 +240,7 @@ export default function AuditLogs() {
             })}
             {filtered.length === 0 && (
               <div className="p-2">
-                <EmptyState icon={ClipboardList} title="NO AUDIT ENTRIES" message={filterAction ? `No entries match action "${filterAction}".` : 'No system activity has been recorded yet.'} />
+                <EmptyState icon={ClipboardList} title="NO AUDIT ENTRIES" message={hasActiveFilters ? 'No entries match the current filters.' : 'No system activity has been recorded yet.'} />
               </div>
             )}
           </div>
