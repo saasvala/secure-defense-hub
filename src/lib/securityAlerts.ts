@@ -58,6 +58,10 @@ function emit() {
   listeners.forEach(l => l(alerts));
 }
 
+function actor(): string {
+  try { return store.getCurrentUser()?.id || 'system'; } catch { return 'system'; }
+}
+
 export const securityAlerts = {
   push(a: Omit<SecurityAlert, 'id' | 'ts'>) {
     const full: SecurityAlert = { ...a, id: crypto.randomUUID(), ts: Date.now() };
@@ -66,16 +70,37 @@ export const securityAlerts = {
     return full;
   },
   ack(id: string) {
+    const target = alerts.find(a => a.id === id);
+    if (!target || target.acknowledged) return;
     alerts = alerts.map(a => a.id === id ? { ...a, acknowledged: true } : a);
     emit();
+    store.addAudit({
+      user_id: actor(),
+      action: 'SECURITY_ALERT_ACK',
+      details: `[${target.level}] ${target.check} — ${target.message}`,
+    });
   },
   ackAll() {
+    const pending = alerts.filter(a => !a.acknowledged).length;
+    if (!pending) return;
     alerts = alerts.map(a => ({ ...a, acknowledged: true }));
     emit();
+    store.addAudit({
+      user_id: actor(),
+      action: 'SECURITY_ALERT_ACK_ALL',
+      details: `Acknowledged ${pending} alert${pending === 1 ? '' : 's'}`,
+    });
   },
   clear() {
+    const count = alerts.length;
+    if (!count) return;
     alerts = [];
     emit();
+    store.addAudit({
+      user_id: actor(),
+      action: 'SECURITY_ALERTS_CLEARED',
+      details: `Cleared ${count} security alert${count === 1 ? '' : 's'} from feed`,
+    });
   },
   all() { return alerts; },
   unacked() { return alerts.filter(a => !a.acknowledged); },
