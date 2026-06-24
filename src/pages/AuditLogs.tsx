@@ -15,9 +15,10 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  List,
 } from 'lucide-react';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZES = [10, 25, 50, 100] as const;
 
 export default function AuditLogs() {
   const audit = store.getAudit();
@@ -32,6 +33,7 @@ export default function AuditLogs() {
   const [dateTo, setDateTo] = useState('');
   const [quickFilter, setQuickFilter] = useState<'ALL' | 'ACK' | 'CLEAR'>('ALL');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZES[0]);
 
   const uniqueActions = [...new Set(audit.map(a => a.action))];
   const actorIds = [...new Set(audit.map(a => a.user_id))];
@@ -67,12 +69,12 @@ export default function AuditLogs() {
 
   useEffect(() => {
     setPage(1);
-  }, [filterAction, filterUser, search, dateFrom, dateTo, quickFilter]);
+  }, [filterAction, filterUser, search, dateFrom, dateTo, quickFilter, pageSize]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const clampedPage = Math.min(page, totalPages);
-  const startIdx = (clampedPage - 1) * PAGE_SIZE;
-  const pageItems = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+  const startIdx = (clampedPage - 1) * pageSize;
+  const pageItems = filtered.slice(startIdx, startIdx + pageSize);
 
   const resetFilters = () => {
     setFilterAction('');
@@ -248,7 +250,7 @@ export default function AuditLogs() {
             </div>
           </div>
           <div className="text-[10px] text-muted-foreground font-tactical tracking-widest">
-            Showing {filtered.length > 0 ? startIdx + 1 : 0}–{Math.min(startIdx + PAGE_SIZE, filtered.length)} of{' '}
+            Showing {filtered.length > 0 ? startIdx + 1 : 0}–{Math.min(startIdx + pageSize, filtered.length)} of{' '}
             {filtered.length} entries
           </div>
         </div>
@@ -336,10 +338,26 @@ export default function AuditLogs() {
 
         {/* Pagination */}
         {filtered.length > 0 && (
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground font-tactical tracking-widest">
-              Page {clampedPage} of {totalPages}
-            </span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground font-tactical tracking-widest">
+                Page {clampedPage} of {totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <List className="w-3 h-3 text-muted-foreground" />
+                <select
+                  value={pageSize}
+                  onChange={e => setPageSize(Number(e.target.value))}
+                  className="bg-input border border-border rounded px-1.5 py-1 text-[10px] font-tactical text-foreground focus:outline-none focus:border-primary"
+                >
+                  {PAGE_SIZES.map(s => (
+                    <option key={s} value={s}>
+                      {s}/page
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
