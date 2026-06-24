@@ -338,10 +338,26 @@ export default function AuditLogs() {
 
         {/* Pagination */}
         {filtered.length > 0 && (
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground font-tactical tracking-widest">
-              Page {clampedPage} of {totalPages}
-            </span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground font-tactical tracking-widest">
+                Page {clampedPage} of {totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <List className="w-3 h-3 text-muted-foreground" />
+                <select
+                  value={pageSize}
+                  onChange={e => setPageSize(Number(e.target.value))}
+                  className="bg-input border border-border rounded px-1.5 py-1 text-[10px] font-tactical text-foreground focus:outline-none focus:border-primary"
+                >
+                  {PAGE_SIZES.map(s => (
+                    <option key={s} value={s}>
+                      {s}/page
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
