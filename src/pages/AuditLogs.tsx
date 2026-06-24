@@ -18,7 +18,7 @@ import {
   List,
 } from 'lucide-react';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZES = [10, 25, 50, 100] as const;
 
 export default function AuditLogs() {
   const audit = store.getAudit();
