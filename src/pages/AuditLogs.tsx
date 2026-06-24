@@ -250,7 +250,7 @@ export default function AuditLogs() {
             </div>
           </div>
           <div className="text-[10px] text-muted-foreground font-tactical tracking-widest">
-            Showing {filtered.length > 0 ? startIdx + 1 : 0}–{Math.min(startIdx + PAGE_SIZE, filtered.length)} of{' '}
+            Showing {filtered.length > 0 ? startIdx + 1 : 0}–{Math.min(startIdx + pageSize, filtered.length)} of{' '}
             {filtered.length} entries
           </div>
         </div>
