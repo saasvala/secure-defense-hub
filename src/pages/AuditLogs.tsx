@@ -69,7 +69,7 @@ export default function AuditLogs() {
 
   useEffect(() => {
     setPage(1);
-  }, [filterAction, filterUser, search, dateFrom, dateTo, quickFilter]);
+  }, [filterAction, filterUser, search, dateFrom, dateTo, quickFilter, pageSize]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const clampedPage = Math.min(page, totalPages);
