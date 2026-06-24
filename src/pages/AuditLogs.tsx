@@ -33,6 +33,7 @@ export default function AuditLogs() {
   const [dateTo, setDateTo] = useState('');
   const [quickFilter, setQuickFilter] = useState<'ALL' | 'ACK' | 'CLEAR'>('ALL');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZES[0]);
 
   const uniqueActions = [...new Set(audit.map(a => a.action))];
   const actorIds = [...new Set(audit.map(a => a.user_id))];
