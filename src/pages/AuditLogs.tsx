@@ -71,10 +71,10 @@ export default function AuditLogs() {
     setPage(1);
   }, [filterAction, filterUser, search, dateFrom, dateTo, quickFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const clampedPage = Math.min(page, totalPages);
-  const startIdx = (clampedPage - 1) * PAGE_SIZE;
-  const pageItems = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+  const startIdx = (clampedPage - 1) * pageSize;
+  const pageItems = filtered.slice(startIdx, startIdx + pageSize);
 
   const resetFilters = () => {
     setFilterAction('');
