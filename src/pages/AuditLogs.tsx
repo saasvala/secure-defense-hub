@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { store } from '@/lib/store';
 import { toast } from 'sonner';
 import PageHeader from '@/components/PageHeader';
