@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { useAuth } from "@/context/useAuth";
 import { seedData } from "@/lib/seed";
+import { ensureSuperAdminExists } from "@/lib/ensureSuperAdmin";
 import AppLayout from "@/components/AppLayout";
 import LicenseScreen from "@/pages/LicenseScreen";
 import SetupScreen from "@/pages/SetupScreen";
