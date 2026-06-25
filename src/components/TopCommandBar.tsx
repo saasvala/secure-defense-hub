@@ -14,9 +14,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export default function TopCommandBar() {
-  const { currentUser, currentRole } = useAuth();
+  const { currentUser, currentRole, realRole, isSuperAdmin, impersonatedRoleName, switchRole } = useAuth();
+  const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
   const [threat] = useState<'LOW' | 'ELEVATED' | 'HIGH'>('ELEVATED');
+  const allRoles = store.getRoles();
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
