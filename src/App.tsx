@@ -17,6 +17,9 @@ import { APP_ROUTES } from "@/lib/routeRegistry";
 
 const queryClient = new QueryClient();
 
+// Seed data on app boot so default Super Admin / roles exist before login.
+seedData();
+
 function AppRoutes() {
   const { appState } = useAuth();
 
@@ -24,8 +27,7 @@ function AppRoutes() {
   if (appState === 'setup') return <SetupScreen />;
   if (appState === 'login') return <LoginScreen />;
 
-  // Seed data on first app access
-  seedData();
+
 
   return (
     <AppLayout>
