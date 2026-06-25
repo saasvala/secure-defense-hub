@@ -85,7 +85,7 @@ export default function TopCommandBar() {
       </button>
 
       {/* Profile */}
-      <div className="flex items-center gap-2 px-2 py-1 rounded border border-border/60 bg-secondary/40">
+      <div className="flex items-center gap-1 px-2 py-1 rounded border border-border/60 bg-secondary/40">
         <div className="w-6 h-6 rounded bg-primary/15 border border-primary/40 flex items-center justify-center">
           <ShieldCheck className="w-3 h-3 text-primary" />
         </div>
@@ -93,7 +93,42 @@ export default function TopCommandBar() {
           <p className="text-[10px] font-tactical text-foreground tracking-wider truncate max-w-[100px]">{currentUser?.username ?? 'OPERATOR'}</p>
           <p className="text-[8px] font-tactical text-tactical-blue/80 tracking-widest truncate max-w-[100px]">{currentRole?.name ?? 'GUEST'}</p>
         </div>
+
+        {isSuperAdmin && (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="ml-1 p-1 rounded border border-border/60 text-tactical-amber hover:bg-secondary/60 transition-colors focus:outline-none"
+              aria-label="Switch role dashboard"
+              title="Switch role dashboard"
+            >
+              <ChevronDown className="w-3 h-3" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60 max-h-[70vh] overflow-y-auto">
+              <DropdownMenuLabel className="text-[10px] font-tactical tracking-widest text-muted-foreground">
+                SWITCH ROLE DASHBOARD
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {allRoles.map((r) => {
+                const isActive = (impersonatedRoleName ?? realRole?.name) === r.name;
+                return (
+                  <DropdownMenuItem
+                    key={r.id}
+                    onClick={() => {
+                      switchRole(r.name === 'Super Admin' ? null : r.name);
+                      navigate(getRoleDashboardRoute(r.name));
+                    }}
+                    className="text-[11px] font-tactical tracking-wider flex items-center justify-between"
+                  >
+                    <span className="truncate">{r.name}</span>
+                    {isActive && <Check className="w-3 h-3 text-tactical-green" />}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
+
     </div>
   );
 }
