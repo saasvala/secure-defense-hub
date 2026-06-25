@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { useAuth } from "@/context/useAuth";
 import { seedData } from "@/lib/seed";
+import { ensureSuperAdminExists } from "@/lib/ensureSuperAdmin";
 import AppLayout from "@/components/AppLayout";
 import LicenseScreen from "@/pages/LicenseScreen";
 import SetupScreen from "@/pages/SetupScreen";
@@ -19,6 +20,8 @@ const queryClient = new QueryClient();
 
 // Seed data on app boot so default Super Admin / roles exist before login.
 seedData();
+// Boot-time integrity check — guarantees default Super Admin is present.
+ensureSuperAdminExists();
 
 function AppRoutes() {
   const { appState } = useAuth();

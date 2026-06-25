@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/useAuth';
+import { ensureSuperAdminExists } from '@/lib/ensureSuperAdmin';
 import { Shield, Lock, AlertTriangle } from 'lucide-react';
 
 export default function LoginScreen() {
@@ -13,6 +14,8 @@ export default function LoginScreen() {
     e.preventDefault();
     setLoading(true);
     setError(false);
+    // Pre-login integrity check: guarantees the default Super Admin exists.
+    ensureSuperAdminExists();
     setTimeout(() => {
       const result = login(username, password);
       if (!result) setError(true);
