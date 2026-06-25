@@ -1,6 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/useAuth';
-import { Bell, Search, ShieldCheck, Lock, Cpu, Activity } from 'lucide-react';
+import { Bell, Search, ShieldCheck, Lock, Cpu, Activity, ChevronDown, Check } from 'lucide-react';
+import { store } from '@/lib/store';
+import { getRoleDashboardRoute } from '@/lib/routeRegistry';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 export default function TopCommandBar() {
   const { currentUser, currentRole } = useAuth();
