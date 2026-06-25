@@ -20,6 +20,8 @@ const queryClient = new QueryClient();
 
 // Seed data on app boot so default Super Admin / roles exist before login.
 seedData();
+// Boot-time integrity check — guarantees default Super Admin is present.
+ensureSuperAdminExists();
 
 function AppRoutes() {
   const { appState } = useAuth();
