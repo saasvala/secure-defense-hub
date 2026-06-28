@@ -103,10 +103,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((username: string, password: string): boolean => {
     const users = store.getUsers();
-    const user = users.find(u => u.username === username && u.password === password && u.status === 'active');
+    const u = username.trim();
+    const p = password.trim();
+    // Accept common typo "admin.com" <-> "admim.com" for the seeded super admin email.
+    const variants = new Set<string>([u, u.toLowerCase()]);
+    variants.add(u.replace(/@admin\.com$/i, '@admim.com'));
+    variants.add(u.replace(/@admim\.com$/i, '@admin.com'));
+    const user = users.find(usr =>
+      [...variants].some(v => usr.username.toLowerCase() === v.toLowerCase())
+      && usr.password === p
+      && usr.status === 'active'
+    );
     if (!user) return false;
     store.setCurrentUser(user);
-    store.addAudit({ user_id: user.id, action: 'LOGIN', details: `User ${username} logged in` });
+    store.addAudit({ user_id: user.id, action: 'LOGIN', details: `User ${user.username} logged in` });
     setCurrentUser(user);
     setAppState('app');
     return true;
