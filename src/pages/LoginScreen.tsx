@@ -47,7 +47,11 @@ export default function LoginScreen() {
                 type="text"
                 value={username}
                 onChange={e => { setUsername(e.target.value); setError(false); }}
-                className="w-full bg-input border border-border rounded px-4 py-3 text-foreground font-tactical text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className="w-full bg-input border border-border rounded px-4 py-3 text-foreground font-body text-sm normal-case tracking-normal focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
+                style={{ textTransform: 'none' }}
                 autoFocus
               />
             </div>
@@ -57,7 +61,11 @@ export default function LoginScreen() {
                 type="password"
                 value={password}
                 onChange={e => { setPassword(e.target.value); setError(false); }}
-                className="w-full bg-input border border-border rounded px-4 py-3 text-foreground font-tactical text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className="w-full bg-input border border-border rounded px-4 py-3 text-foreground font-body text-sm normal-case tracking-normal focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
+                style={{ textTransform: 'none' }}
               />
             </div>
 
