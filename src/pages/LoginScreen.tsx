@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/useAuth';
-import { ensureSuperAdminExists } from '@/lib/ensureSuperAdmin';
-import { Shield, Lock, AlertTriangle } from 'lucide-react';
+import { ensureSuperAdminExists, DEFAULT_SUPER_ADMIN } from '@/lib/ensureSuperAdmin';
+import { Shield, Lock, AlertTriangle, KeyRound } from 'lucide-react';
+
 
 export default function LoginScreen() {
   const { login } = useAuth();
