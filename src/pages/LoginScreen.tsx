@@ -83,37 +83,8 @@ export default function LoginScreen() {
               {loading ? '[ AUTHENTICATING... ]' : '[ LOGIN ]'}
             </button>
           </form>
-
-          <div className="mt-6 pt-4 border-t border-border">
-            <div className="flex items-center gap-2 mb-2">
-              <KeyRound className="w-3 h-3 text-primary" />
-              <span className="font-tactical text-[10px] text-muted-foreground uppercase tracking-wider">
-                Default Super Admin
-              </span>
-            </div>
-            <div className="space-y-1 font-mono text-[11px] text-foreground/90 bg-input/50 border border-border/60 rounded px-3 py-2">
-              <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">user:</span>
-                <span className="truncate">{DEFAULT_SUPER_ADMIN.username}</span>
-              </div>
-              <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">pass:</span>
-                <span className="truncate">{DEFAULT_SUPER_ADMIN.password}</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setUsername(DEFAULT_SUPER_ADMIN.username);
-                setPassword(DEFAULT_SUPER_ADMIN.password);
-                setError(false);
-              }}
-              className="mt-2 w-full text-[10px] font-tactical text-primary/80 hover:text-primary border border-primary/20 hover:border-primary/50 rounded py-1.5 transition-colors"
-            >
-              [ AUTO-FILL CREDENTIALS ]
-            </button>
-          </div>
         </div>
+
 
 
         <div className="text-center mt-6">
