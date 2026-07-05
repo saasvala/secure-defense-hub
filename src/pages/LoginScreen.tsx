@@ -15,8 +15,6 @@ export default function LoginScreen() {
     e.preventDefault();
     setLoading(true);
     setError(false);
-    // Pre-login integrity check: guarantees the default Super Admin exists.
-    ensureSuperAdminExists();
     setTimeout(() => {
       const result = login(username, password);
       if (!result) setError(true);
