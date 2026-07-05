@@ -117,20 +117,8 @@ export function seedData() {
   };
   const superAdminId = getRoleId('Super Admin');
 
-  // Ensure default Super Admin account exists (key-based provisioning)
-  const DEFAULT_SUPER_ADMIN = {
-    username: 'Softwarevala@admim.com',
-    password: 'softwarevala#123456',
-  };
-  const allUsersInitial = store.getUsers();
-  const hasDefaultSA = allUsersInitial.some(u => u.username === DEFAULT_SUPER_ADMIN.username);
-  if (!hasDefaultSA) {
-    store.setUsers([
-      { id: genId(), role_id: superAdminId, username: DEFAULT_SUPER_ADMIN.username, password: DEFAULT_SUPER_ADMIN.password, status: 'active' as const },
-      ...allUsersInitial,
-    ]);
-    store.setSetupComplete(true);
-  }
+  // NOTE: Super Admin account is NOT auto-seeded. It must be created by the
+  // user via the Setup screen after license activation (first-time flow).
 
   const allUsers = store.getUsers();
   // Repair previously mis-seeded users (everyone showing Super Admin)
