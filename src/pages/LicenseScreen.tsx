@@ -5,16 +5,16 @@ import { Shield, KeyRound, AlertTriangle } from 'lucide-react';
 export default function LicenseScreen() {
   const { activateLicense } = useAuth();
   const [key, setKey] = useState('');
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<null | 'invalid' | 'expired'>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(false);
+    setError(null);
     setTimeout(() => {
       const result = activateLicense(key);
-      if (!result) setError(true);
+      if (!result.ok) setError(result.reason);
       setLoading(false);
     }, 800);
   };
