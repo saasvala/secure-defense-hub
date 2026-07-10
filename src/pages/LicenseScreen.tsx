@@ -50,7 +50,7 @@ export default function LicenseScreen() {
               <input
                 type="text"
                 value={key}
-                onChange={(e) => { setKey(e.target.value); setError(false); }}
+                onChange={(e) => { setKey(e.target.value); setError(null); }}
                 placeholder="DRO-XXXX-XXXXX-XXXX"
                 className="w-full bg-input border border-border rounded px-4 py-3 text-foreground font-tactical text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
                 autoFocus
@@ -60,7 +60,11 @@ export default function LicenseScreen() {
             {error && (
               <div className="flex items-center gap-2 text-destructive text-xs font-tactical bg-destructive/10 border border-destructive/20 rounded px-3 py-2">
                 <AlertTriangle className="w-3 h-3" />
-                <span>Invalid License Key — Access Denied</span>
+                <span>
+                  {error === 'expired'
+                    ? 'License Expired — Access Denied'
+                    : 'Invalid License Key — Access Denied'}
+                </span>
               </div>
             )}
 
