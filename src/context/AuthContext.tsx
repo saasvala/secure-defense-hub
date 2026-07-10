@@ -2,15 +2,23 @@ import { useState, useCallback, type ReactNode } from 'react';
 import { store, type User, type Role } from '@/lib/store';
 import { AuthContext, type AppState } from './auth-context';
 
-// Valid license keys (hardcoded for offline)
-const VALID_KEYS = [
-  'DRO-2024-ALPHA-7X9K',
-  'DRO-2024-BRAVO-3M2P',
-  'DRO-2024-DELTA-8W4R',
-  'SOFTWAREVALA-MASTER-KEY',
-  '2345-3456-4567',         // 12-digit license key
-  '5678-2345-3456',         // backup key
-];
+// Valid license keys (hardcoded for offline). Each key has an expiry date.
+const VALID_LICENSES: Record<string, string> = {
+  'DRO-2024-ALPHA-7X9K': '2026-12-31',
+  'DRO-2024-BRAVO-3M2P': '2026-12-31',
+  'DRO-2024-DELTA-8W4R': '2026-12-31',
+  'SOFTWAREVALA-MASTER-KEY': '2099-12-31',
+  '2345-3456-4567': '2026-12-31',
+  '5678-2345-3456': '2026-12-31',
+  // Test-only expired key (used by integration tests)
+  'DRO-EXPIRED-TEST-KEY': '2020-01-01',
+};
+
+function isExpired(expiry: string): boolean {
+  // Compare on YYYY-MM-DD basis to avoid TZ drift
+  const today = new Date().toISOString().slice(0, 10);
+  return expiry < today;
+}
 
 const IMPERSONATE_KEY = 'dro_impersonated_role';
 
@@ -55,25 +63,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (currentUser) store.addAudit({ user_id: currentUser.id, action: 'ROLE_SWITCH', details: `Viewing as ${roleName}` });
   }, [currentUser]);
 
-  const activateLicense = useCallback((key: string): boolean => {
+  const activateLicense = useCallback((key: string): { ok: true } | { ok: false; reason: 'invalid' | 'expired' } => {
     const trimmed = key.trim().toUpperCase();
-    const match = VALID_KEYS.find(k => k.toUpperCase() === trimmed);
-    if (!match) return false;
+    const matchKey = Object.keys(VALID_LICENSES).find(k => k.toUpperCase() === trimmed);
+    if (!matchKey) return { ok: false, reason: 'invalid' };
+
+    const expiry = VALID_LICENSES[matchKey];
+    if (isExpired(expiry)) {
+      store.addAudit({ user_id: 'system', action: 'LICENSE_REJECTED', details: `Expired key: ${matchKey.slice(0, 8)}...` });
+      return { ok: false, reason: 'expired' };
+    }
 
     const deviceId = navigator.userAgent.slice(0, 50);
     store.setLicense({
       id: crypto.randomUUID(),
-      key: match,
+      key: matchKey,
       device: deviceId,
-      expiry: '2026-12-31',
+      expiry,
       modules: ['all'],
       seats: 50,
       activated: true,
     });
-    store.addAudit({ user_id: 'system', action: 'LICENSE_ACTIVATED', details: `Key: ${match.slice(0, 8)}...` });
+    store.addAudit({ user_id: 'system', action: 'LICENSE_ACTIVATED', details: `Key: ${matchKey.slice(0, 8)}...` });
     // If a Super Admin already exists (seeded), skip setup and go straight to login.
     setAppState(store.isSetupComplete() ? 'login' : 'setup');
-    return true;
+    return { ok: true };
   }, []);
 
   const completeSetup = useCallback((username: string, password: string) => {
