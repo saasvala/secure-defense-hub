@@ -63,25 +63,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (currentUser) store.addAudit({ user_id: currentUser.id, action: 'ROLE_SWITCH', details: `Viewing as ${roleName}` });
   }, [currentUser]);
 
-  const activateLicense = useCallback((key: string): boolean => {
+  const activateLicense = useCallback((key: string): { ok: true } | { ok: false; reason: 'invalid' | 'expired' } => {
     const trimmed = key.trim().toUpperCase();
-    const match = VALID_KEYS.find(k => k.toUpperCase() === trimmed);
-    if (!match) return false;
+    const matchKey = Object.keys(VALID_LICENSES).find(k => k.toUpperCase() === trimmed);
+    if (!matchKey) return { ok: false, reason: 'invalid' };
+
+    const expiry = VALID_LICENSES[matchKey];
+    if (isExpired(expiry)) {
+      store.addAudit({ user_id: 'system', action: 'LICENSE_REJECTED', details: `Expired key: ${matchKey.slice(0, 8)}...` });
+      return { ok: false, reason: 'expired' };
+    }
 
     const deviceId = navigator.userAgent.slice(0, 50);
     store.setLicense({
       id: crypto.randomUUID(),
-      key: match,
+      key: matchKey,
       device: deviceId,
-      expiry: '2026-12-31',
+      expiry,
       modules: ['all'],
       seats: 50,
       activated: true,
     });
-    store.addAudit({ user_id: 'system', action: 'LICENSE_ACTIVATED', details: `Key: ${match.slice(0, 8)}...` });
+    store.addAudit({ user_id: 'system', action: 'LICENSE_ACTIVATED', details: `Key: ${matchKey.slice(0, 8)}...` });
     // If a Super Admin already exists (seeded), skip setup and go straight to login.
     setAppState(store.isSetupComplete() ? 'login' : 'setup');
-    return true;
+    return { ok: true };
   }, []);
 
   const completeSetup = useCallback((username: string, password: string) => {
