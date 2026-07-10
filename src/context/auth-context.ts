@@ -12,7 +12,7 @@ export interface AuthContextType {
   switchRole: (roleName: string | null) => void;
   login: (username: string, password: string) => boolean;
   logout: () => void;
-  activateLicense: (key: string) => boolean;
+  activateLicense: (key: string) => { ok: true } | { ok: false; reason: 'invalid' | 'expired' };
   completeSetup: (username: string, password: string) => void;
   isLicensed: boolean;
   isSuperAdmin: boolean;
