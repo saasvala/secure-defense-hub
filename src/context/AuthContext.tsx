@@ -2,15 +2,23 @@ import { useState, useCallback, type ReactNode } from 'react';
 import { store, type User, type Role } from '@/lib/store';
 import { AuthContext, type AppState } from './auth-context';
 
-// Valid license keys (hardcoded for offline)
-const VALID_KEYS = [
-  'DRO-2024-ALPHA-7X9K',
-  'DRO-2024-BRAVO-3M2P',
-  'DRO-2024-DELTA-8W4R',
-  'SOFTWAREVALA-MASTER-KEY',
-  '2345-3456-4567',         // 12-digit license key
-  '5678-2345-3456',         // backup key
-];
+// Valid license keys (hardcoded for offline). Each key has an expiry date.
+const VALID_LICENSES: Record<string, string> = {
+  'DRO-2024-ALPHA-7X9K': '2026-12-31',
+  'DRO-2024-BRAVO-3M2P': '2026-12-31',
+  'DRO-2024-DELTA-8W4R': '2026-12-31',
+  'SOFTWAREVALA-MASTER-KEY': '2099-12-31',
+  '2345-3456-4567': '2026-12-31',
+  '5678-2345-3456': '2026-12-31',
+  // Test-only expired key (used by integration tests)
+  'DRO-EXPIRED-TEST-KEY': '2020-01-01',
+};
+
+function isExpired(expiry: string): boolean {
+  // Compare on YYYY-MM-DD basis to avoid TZ drift
+  const today = new Date().toISOString().slice(0, 10);
+  return expiry < today;
+}
 
 const IMPERSONATE_KEY = 'dro_impersonated_role';
 
